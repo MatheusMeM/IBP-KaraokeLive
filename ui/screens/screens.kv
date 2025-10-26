@@ -84,6 +84,81 @@
             pos_hint: {'center_x': 0.5, 'center_y': 0.15}
             on_press: app.app_manager.show_instructions()
 
+<CountdownScreen>:
+    name: 'countdown'
+    canvas.before:
+        Color:
+            rgba: color_white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+
+<RehearsalScreen>:
+    name: 'rehearsal'
+    canvas.before:
+        Color:
+            rgba: color_white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+
+<CTAScreen>:
+    name: 'cta'
+    canvas.before:
+        Color:
+            rgba: color_white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+
+<PerformanceScreen>:
+    name: 'performance'
+    canvas.before:
+        Color:
+            rgba: color_white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+
+<CongratulationsScreen>:
+    name: 'congratulations'
+    canvas.before:
+        Color:
+            rgba: color_white
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+
 <InstructionsScreen>:
     name: 'instructions'
     canvas.before:

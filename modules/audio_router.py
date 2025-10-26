@@ -3,13 +3,15 @@ Audio routing and playback for IBP-KaraokeLive.
 
 This module manages audio playback to specific output devices using
 sounddevice for direct hardware control. Supports rehearsal mode
-(headphones only) and performance mode (headphones + speakers).
+(headphones only) and performance mode (headphones + speakers with
+separate audio files).
 
 Based on successful testing documented in AUDIO-ROUTING-TEST-RESULTS.md
 """
 import threading
+import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 import numpy as np
 import sounddevice as sd
@@ -38,107 +40,93 @@ class AudioRouter:
 
     def __init__(self):
         """Initialize audio router."""
-        self.audio_data: Optional[np.ndarray] = None
+        self.audio_data: Dict[str, Optional[np.ndarray]] = {
+            'headphone': None,
+            'speaker': None
+        }
         self.sample_rate: Optional[int] = None
-        self.mode = 'headphone'  # 'headphone' or 'both'
+        self.mode = 'rehearsal'  # 'rehearsal' or 'performance'
         self.is_loaded = False
+        self.start_time = 0
+        self.duration = 0
+        self.is_playing_flag = False
+        self.streams: Dict[str, Optional[sd.OutputStream]] = {
+            'headphone': None,
+            'speaker': None
+        }
 
-    def load_audio(self, filepath: str) -> bool:
+    def load_audio(self, vocal_filepath: str,
+                   instrumental_filepath: Optional[str] = None) -> bool:
         """
-        Load audio file into memory.
+        Load audio file(s) into memory.
 
         Args:
-            filepath: Path to audio file (WAV format recommended)
+            vocal_filepath: Path to vocal track (for headphones)
+            instrumental_filepath: Path to instrumental track
+                                 (for speakers in performance mode)
 
         Returns:
             True if loaded successfully, False otherwise
         """
-        audio_path = Path(filepath)
+        vocal_path = Path(vocal_filepath)
 
-        if not audio_path.exists():
-            print(f"❌ Audio file not found: {audio_path}")
+        if not vocal_path.exists():
+            print(f"❌ Vocal audio file not found: {vocal_path}")
             return False
 
         try:
-            self.audio_data, self.sample_rate = sf.read(str(audio_path))
-            self.is_loaded = True
+            # Load vocal track
+            data, sr = sf.read(str(vocal_path))
+            self.audio_data['headphone'] = data
+            self.sample_rate = sr
+            self.duration = len(data) / sr
+            
             print(
-                f"✅ Audio loaded: {audio_path.name} "
-                f"({self.sample_rate} Hz)"
+                f"✅ Vocal audio loaded: {vocal_path.name} "
+                f"({sr} Hz, {self.duration:.1f}s)"
             )
+            
+            # Load instrumental track if provided (performance mode)
+            if instrumental_filepath:
+                inst_path = Path(instrumental_filepath)
+                if inst_path.exists():
+                    inst_data, inst_sr = sf.read(str(inst_path))
+                    if inst_sr != sr:
+                        print(
+                            f"⚠️ Sample rate mismatch: "
+                            f"{inst_sr} vs {sr}"
+                        )
+                        return False
+                    self.audio_data['speaker'] = inst_data
+                    print(
+                        f"✅ Instrumental audio loaded: "
+                        f"{inst_path.name}"
+                    )
+                else:
+                    print(f"⚠️ Instrumental file not found: {inst_path}")
+            
+            self.is_loaded = True
             return True
         except Exception as e:
             print(f"❌ Error loading audio: {e}")
             self.is_loaded = False
             return False
 
-    def play_on_speaker(self) -> None:
+    def _play_stream(self, device: int, data: np.ndarray,
+                     stream_key: str) -> None:
         """
-        Play audio on speakers (public/audience output).
+        Play audio stream on specified device.
 
-        Plays on device 8 (Realtek native speakers).
+        Args:
+            device: Device ID
+            data: Audio data array
+            stream_key: Key for storing stream reference
         """
-        if not self.is_loaded or self.audio_data is None:
-            print("⚠️ No audio loaded")
-            return
-
         try:
-            sd.play(
-                self.audio_data,
-                self.sample_rate,
-                device=self.DEVICE_SPEAKER
-            )
-            print(f"🔊 Playing on speakers (device {self.DEVICE_SPEAKER})")
+            # Use blocking playback for complete file playback
+            sd.play(data, self.sample_rate, device=device, blocking=True)
         except Exception as e:
-            print(f"❌ Error playing on speakers: {e}")
-
-    def play_on_headphone(self) -> None:
-        """
-        Play audio on headphones (singer output).
-
-        Plays on device 9 (USB Audio Device headphones).
-        """
-        if not self.is_loaded or self.audio_data is None:
-            print("⚠️ No audio loaded")
-            return
-
-        try:
-            sd.play(
-                self.audio_data,
-                self.sample_rate,
-                device=self.DEVICE_HEADPHONE
-            )
-            print(
-                f"🎧 Playing on headphones "
-                f"(device {self.DEVICE_HEADPHONE})"
-            )
-        except Exception as e:
-            print(f"❌ Error playing on headphones: {e}")
-
-    def play_on_both(self) -> None:
-        """
-        Play audio on both speakers and headphones simultaneously.
-
-        Uses threading to start playback on both devices at nearly the
-        same time. Some minimal desynchronization may occur.
-        """
-        if not self.is_loaded or self.audio_data is None:
-            print("⚠️ No audio loaded")
-            return
-
-        try:
-            # Start playback on both devices using threads
-            speaker_thread = threading.Thread(target=self.play_on_speaker)
-            headphone_thread = threading.Thread(
-                target=self.play_on_headphone
-            )
-
-            speaker_thread.start()
-            headphone_thread.start()
-
-            print("🔊🎧 Playing on both devices")
-        except Exception as e:
-            print(f"❌ Error playing on both devices: {e}")
+            print(f"❌ Error playing on device {device}: {e}")
 
     def set_rehearsal_mode(self) -> None:
         """
@@ -147,31 +135,94 @@ class AudioRouter:
         In rehearsal mode, audio plays only through headphones,
         allowing the singer to practice without the audience hearing.
         """
-        self.mode = 'headphone'
+        self.mode = 'rehearsal'
         print("🎧 Mode: Rehearsal (headphones only)")
 
     def set_performance_mode(self) -> None:
         """
-        Switch to performance mode (headphones + speakers).
+        Switch to performance mode (vocal on headphones +
+        instrumental on speakers).
 
-        In performance mode, audio plays through both headphones
-        (for the singer) and speakers (for the audience).
+        In performance mode:
+        - Vocal track plays through headphones (for the singer)
+        - Instrumental track plays through speakers (for the audience)
         """
-        self.mode = 'both'
-        print("🔊 Mode: Performance (headphones + speakers)")
+        self.mode = 'performance'
+        print("🔊 Mode: Performance (vocal+instrumental)")
 
     def play(self) -> None:
         """
         Play audio according to current mode.
 
         Routes to appropriate device(s) based on mode:
-        - Rehearsal mode: headphones only
-        - Performance mode: both devices
+        - Rehearsal mode: vocal on headphones only
+        - Performance mode: vocal on headphones + instrumental
+                           on speakers
         """
-        if self.mode == 'headphone':
-            self.play_on_headphone()
-        elif self.mode == 'both':
-            self.play_on_both()
+        if not self.is_loaded:
+            print("⚠️ No audio loaded")
+            return
+
+        self.start_time = time.time()
+        self.is_playing_flag = True
+
+        if self.mode == 'rehearsal':
+            # Rehearsal: vocal on headphones only
+            if self.audio_data['headphone'] is not None:
+                print(
+                    f"🎧 Playing rehearsal on headphones "
+                    f"(device {self.DEVICE_HEADPHONE})"
+                )
+                thread = threading.Thread(
+                    target=self._play_stream,
+                    args=(
+                        self.DEVICE_HEADPHONE,
+                        self.audio_data['headphone'],
+                        'headphone'
+                    )
+                )
+                thread.daemon = True
+                thread.start()
+        
+        elif self.mode == 'performance':
+            # Performance: vocal on headphones + instrumental on speakers
+            if (self.audio_data['headphone'] is not None and
+                self.audio_data['speaker'] is not None):
+                
+                print(
+                    f"🔊🎧 Playing performance: "
+                    f"vocal on {self.DEVICE_HEADPHONE}, "
+                    f"instrumental on {self.DEVICE_SPEAKER}"
+                )
+                
+                # Start both streams simultaneously
+                headphone_thread = threading.Thread(
+                    target=self._play_stream,
+                    args=(
+                        self.DEVICE_HEADPHONE,
+                        self.audio_data['headphone'],
+                        'headphone'
+                    )
+                )
+                speaker_thread = threading.Thread(
+                    target=self._play_stream,
+                    args=(
+                        self.DEVICE_SPEAKER,
+                        self.audio_data['speaker'],
+                        'speaker'
+                    )
+                )
+                
+                headphone_thread.daemon = True
+                speaker_thread.daemon = True
+                
+                headphone_thread.start()
+                speaker_thread.start()
+            else:
+                print(
+                    "⚠️ Performance mode requires both "
+                    "vocal and instrumental tracks"
+                )
 
     def stop(self) -> None:
         """Stop all audio playback on all devices."""
@@ -180,18 +231,25 @@ class AudioRouter:
 
     def get_position(self) -> float:
         """
-        Get current playback position.
+        Get current playback position based on elapsed time.
 
         Returns:
             Current position in seconds (0.0 if not playing)
-
-        Note:
-            sounddevice doesn't provide direct position tracking.
-            Consider using time.time() tracking for position.
         """
-        # sounddevice doesn't provide get_pos() like Kivy
-        # Position tracking would need to be implemented separately
-        return 0.0
+        if not self.is_playing_flag:
+            return 0.0
+        
+        elapsed = time.time() - self.start_time
+        return min(elapsed, self.duration)
+
+    def get_duration(self) -> float:
+        """
+        Get total audio duration.
+
+        Returns:
+            Duration in seconds
+        """
+        return self.duration
 
     def is_playing(self) -> bool:
         """
@@ -199,11 +257,14 @@ class AudioRouter:
 
         Returns:
             True if playing, False otherwise
-
-        Note:
-            This is a simplified check. For production, implement
-            proper state tracking.
         """
-        # sounddevice uses callback-based playback
-        # This would need proper state management
-        return sd.get_stream().active if sd.get_stream() else False
+        if not self.is_playing_flag:
+            return False
+        
+        # Check if we've exceeded duration
+        elapsed = time.time() - self.start_time
+        if elapsed >= self.duration:
+            self.is_playing_flag = False
+            return False
+        
+        return True

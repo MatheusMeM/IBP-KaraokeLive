@@ -29,6 +29,13 @@ from kivy.core.window import Window
 from ui.screens.welcome_screen import WelcomeScreen
 from ui.screens.instructions_screen import InstructionsScreen
 from ui.screens.leaderboard_screen import LeaderboardScreen
+from ui.screens.countdown_screen import CountdownScreen
+from ui.screens.rehearsal_screen import RehearsalScreen
+from ui.screens.cta_screen import CTAScreen
+from ui.screens.performance_screen import PerformanceScreen
+from ui.screens.congratulations_screen import (
+    CongratulationsScreen
+)
 from ui.app_manager import AppManager
 
 
@@ -48,6 +55,15 @@ class KaraokeApp(App):
         sm.add_widget(WelcomeScreen(name='welcome'))
         sm.add_widget(InstructionsScreen(name='instructions'))
         sm.add_widget(LeaderboardScreen(name='leaderboard'))
+        
+        # Phase 3: Add karaoke screens
+        sm.add_widget(CountdownScreen(name='countdown'))
+        sm.add_widget(RehearsalScreen(name='rehearsal'))
+        sm.add_widget(CTAScreen(name='cta'))
+        sm.add_widget(PerformanceScreen(name='performance'))
+        sm.add_widget(
+            CongratulationsScreen(name='congratulations')
+        )
         
         # Bind global keyboard shortcuts
         Window.bind(on_keyboard=self.on_key_press)

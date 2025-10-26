@@ -28,19 +28,30 @@ class AppManager:
         print("AppManager initialized for IBP-KaraokeLive Phase 0")
     
     def show_instructions(self):
-        """Show instructions screen (placeholder for future karaoke)."""
+        """Show instructions screen before rehearsal."""
         screen = self.sm.get_screen('instructions')
         screen.update_content(
-            title='IBP KaraokeLive',
-            body='\n\nBem-vindo ao Karaokê IBP!\n\nEm breve: cante e ganhe pontos.\n\n',
-            button_text='VOLTAR'
+            title='Como Funciona',
+            body=('Você terá dois momentos:\n\n'
+                  '1️⃣ ENSAIO: Pratique com fones de ouvido\n'
+                  '   (só você escuta)\n\n'
+                  '2️⃣ PERFORMANCE: Mostre seu talento!\n'
+                  '   (todos escutam no som ambiente)\n\n'
+                  'Prepare-se para cantar!'),
+            button_text='▶ ENSAIO'
         )
         self.go_to_screen('instructions')
     
     def proceed_from_instructions(self):
-        """Proceed from instructions screen (Phase 0: returns to welcome)."""
-        print("Proceeding from instructions → welcome")
-        self.return_to_welcome()
+        """Navigate from instructions to countdown before rehearsal."""
+        print("Proceeding from instructions → countdown → rehearsal")
+        
+        # Configure countdown to transition to rehearsal
+        countdown = self.sm.get_screen('countdown')
+        countdown.next_screen = 'rehearsal'
+        
+        # Navigate to countdown screen
+        self.go_to_screen('countdown')
     
     def show_leaderboard(self, player_name=None):
         """

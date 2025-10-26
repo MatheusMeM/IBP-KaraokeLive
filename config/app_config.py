@@ -37,7 +37,7 @@ DEBUG_MODE = True  # Set to False for production
 # =============================================================================
 # KARAOKE PATHS (Phase 1: Core Modules)
 # =============================================================================
-AUDIO_FILE = 'assets/audio/jingle_ibp.mp3'
+AUDIO_FILE = 'assets/audio/Ibp - Energia da Revolucao.wav'
 LYRICS_FILE = 'data/lyrics.json'
 
 # =============================================================================
