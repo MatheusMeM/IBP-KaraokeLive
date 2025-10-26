@@ -1,6 +1,10 @@
 # Interface
 kivy>=2.3.0
 
+# Video playback (required for Kivy Video widget)
+pillow>=10.0.0
+ffpyplayer>=4.5.0
+
 # Audio routing
 sounddevice>=0.5.3
 soundfile>=0.13.1

@@ -115,12 +115,7 @@
 
 <RehearsalScreen>:
     name: 'rehearsal'
-    canvas.before:
-        Color:
-            rgba: (0, 0, 0, 1)  # Black background for video
-        Rectangle:
-            pos: self.pos
-            size: self.size
+    # Video widget added in Python - no canvas.before needed
 
 <CTAScreen>:
     name: 'cta'
@@ -137,6 +132,15 @@
             allow_stretch: True
             keep_ratio: False
             opacity: 0.15
+        
+        # IBP Logo at top
+        Image:
+            source: 'assets/images/ibp_logo_simples.png'
+            size_hint: (None, None)
+            size: (dp(200), dp(80))
+            pos_hint: {'center_x': 0.5, 'top': 0.95}
+            allow_stretch: True
+            keep_ratio: True
         
         # Content container
         BoxLayout:
@@ -189,12 +193,7 @@
 
 <PerformanceScreen>:
     name: 'performance'
-    canvas.before:
-        Color:
-            rgba: (0, 0, 0, 1)  # Black background for video
-        Rectangle:
-            pos: self.pos
-            size: self.size
+    # Video widget added in Python - no canvas.before needed
 
 <CongratulationsScreen>:
     name: 'congratulations'
@@ -252,7 +251,7 @@
                         radius: [dp(30)]
                 
                 BrandedLabel:
-                    text: 'Você arrasou no karaoke!\\n\\nObrigado por participar da\\nativação IBP 2025'
+                    text: 'Você mandou muito bem!\\n\\nObrigado por participar do\\nKaraoke IBP'
                     font_size: '45sp'
                     text_size: self.width, None
                     halign: 'center'

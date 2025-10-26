@@ -3,11 +3,13 @@ Tela de performance - música com letras (fone + caixa).
 """
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.video import Video
 from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.graphics import Color, Rectangle, RoundedRectangle
 
 from modules.audio_router import AudioRouter
 from modules.lyric_display import LyricDisplay
@@ -26,20 +28,35 @@ class PerformanceScreen(Screen):
         
         # Video background - add first so it's behind everything
         self.video = Video(
-            source='assets/video/Ibp - Energia da Revolução.mp4',
+            source='assets/video/Ibp - Energia da Revolucao.mp4',
             state='stop',
             allow_stretch=True,
             keep_ratio=False,  # Fill entire screen
             opacity=0.5,  # Visible by default
+            volume=0,  # Mute video audio to avoid interference
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
         self.add_widget(self.video)
         
-        # UI - Semi-transparent overlay container
-        from kivy.uix.floatlayout import FloatLayout
-        from kivy.graphics import Color, Rectangle, RoundedRectangle
+        # Blocker for embedded video subtitles (bottom 25% of screen)
+        subtitle_blocker = BoxLayout(
+            size_hint=(1, 0.25),
+            pos_hint={'x': 0.5, 'y': 0.01}
+        )
+        with subtitle_blocker.canvas.before:
+            Color(0, 0, 0, 0.9)  # Semi-opaque black overlay
+            self.blocker_bg = Rectangle(
+                pos=subtitle_blocker.pos,
+                size=subtitle_blocker.size
+            )
+        subtitle_blocker.bind(
+            pos=lambda instance, value: setattr(self.blocker_bg, 'pos', value),
+            size=lambda instance, value: setattr(self.blocker_bg, 'size', value)
+        )
+        self.add_widget(subtitle_blocker)
         
+        # UI - Semi-transparent overlay container
         # Transparent overlay to hold UI elements
         overlay = FloatLayout(size_hint=(1, 1))
         
@@ -163,6 +180,20 @@ class PerformanceScreen(Screen):
     
     def on_enter(self):
         """Iniciar performance."""
+        print("=" * 50)
+        print("🎬 Entering PerformanceScreen")
+        print(f"Video widget exists: {hasattr(self, 'video')}")
+        if hasattr(self, 'video'):
+            print(f"Video source: {self.video.source}")
+            print(f"Video state: {self.video.state}")
+            print(f"Video size: {self.video.size}")
+            print(f"Video position: {self.video.pos}")
+            print(f"Video opacity: {self.video.opacity}")
+        print(f"Total children widgets: {len(self.children)}")
+        for i, child in enumerate(self.children):
+            print(f"  Child {i}: {child.__class__.__name__}")
+        print("=" * 50)
+        
         # Bind keyboard for skip shortcut (development)
         Window.bind(on_keyboard=self._on_keyboard)
         
@@ -175,6 +206,7 @@ class PerformanceScreen(Screen):
         self.audio_router.load_audio(vocal_file, instrumental_file)
         
         # Iniciar video com fade-in
+        print(f"🎥 Starting video playback: {self.video.source}")
         self.video.state = 'play'
         anim = Animation(opacity=1, duration=1.5)
         anim.start(self.video)
