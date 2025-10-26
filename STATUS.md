@@ -28,20 +28,23 @@ IBP-KaraokeLive/
 │   │   ├── screens.py         # WelcomeScreen base
 │   │   ├── screens.kv         # Kivy layouts (horizontal 1920x1080)
 │   │   ├── instructions_screen.py
-│   │   └── leaderboard_screen.py
+│   │   ├── leaderboard_screen.py
+│   │   └── welcome_screen.py
 │   └── widgets/
 │       └── __init__.py
 ├── assets/
-│   └── images/
-│       ├── background_graphic.png
-│       ├── ibp_logo.png
-│       └── ibp_logo_simples.png
-├── ref_code/                  # Reference code (not modified)
-│   ├── interactive-stand-game/
-│   └── [UltraSinger components]
+│   ├── audio/
+│   ├── fonts/
+│   ├── images/
+│   │   ├── background_graphic.png
+│   │   ├── ibp_logo.png
+│   │   └── ibp_logo_simples.png
+│   └── video/
 ├── venv/                      # Virtual environment (Python 3.13, Kivy 2.3.1)
 ├── main.py                    # Entry point (Windows 11, no GPIO)
 ├── requirements.txt           # kivy>=2.3.0
+├── PROMPT-FASE0-RooCode.md    # Development prompts
+├── STATUS.md                  # This status documentation
 └── .gitignore
 ```
 
