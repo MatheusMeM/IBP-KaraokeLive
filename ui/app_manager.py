@@ -33,12 +33,12 @@ class AppManager:
         screen.update_content(
             title='Como Funciona',
             body=('Você terá dois momentos:\n\n'
-                  '1️⃣ ENSAIO: Pratique com fones de ouvido\n'
+                  '1️ ENSAIO: Pratique com fones de ouvido\n'
                   '   (só você escuta)\n\n'
-                  '2️⃣ PERFORMANCE: Mostre seu talento!\n'
+                  '2️ PERFORMANCE: Mostre seu talento!\n'
                   '   (todos escutam no som ambiente)\n\n'
                   'Prepare-se para cantar!'),
-            button_text='▶ ENSAIO'
+            button_text='Começar Ensaio'
         )
         self.go_to_screen('instructions')
     

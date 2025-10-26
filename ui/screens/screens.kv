@@ -156,7 +156,7 @@
             
             # Title
             BrandedLabel:
-                text: '🎉 ÓTIMO ENSAIO!'
+                text: ' ÓTIMO ENSAIO!'
                 font_size: '70sp'
                 bold: True
                 color: color_primary_green
@@ -230,7 +230,7 @@
             
             # Title
             BrandedLabel:
-                text: '🎉 PARABÉNS! 🎉'
+                text: ' PARABÉNS! '
                 font_size: '80sp'
                 bold: True
                 color: (1, 0.7, 0, 1)
@@ -259,7 +259,7 @@
             
             # Restart button
             BrandedButton:
-                text: '🔄 JOGAR NOVAMENTE'
+                text: ' JOGAR NOVAMENTE'
                 size_hint_y: 0.2
                 font_size: '45sp'
                 on_press: root.restart(self)
@@ -290,11 +290,11 @@
         
         # Top spacer
         Widget:
-            size_hint_y: 0.15
+            size_hint_y: 0.05
         
         # Content box
         BoxLayout:
-            size_hint_y: 0.5
+            size_hint_y: 0.7
             padding: dp(50)
             canvas.before:
                 Color:
@@ -313,7 +313,7 @@
                     text: root.title_text
                     font_size: '55sp'
                     bold: True
-                    size_hint_y: 0.2
+                    size_hint_y: 0.15
                 
                 BrandedLabel:
                     id: body_label
@@ -321,7 +321,7 @@
                     markup: True
                     font_size: '35sp'
                     text_size: self.width, None
-                    size_hint_y: 0.8
+                    size_hint_y: 0.55
                     valign: 'top'
                     halign: 'left'
                     padding: [dp(30), 0]
@@ -339,14 +339,14 @@
             
             Image:
                 source: 'assets/images/ibp_logo_simples.png'
-                size_hint_y: None
+                size_hint_y: 0.1
                 height: dp(60)
                 allow_stretch: True
                 keep_ratio: True
         
         # Bottom spacer
         Widget:
-            size_hint_y: 0.1
+            size_hint_y: 0.01
 
 <ScoreScreen>:
     name: 'score'
