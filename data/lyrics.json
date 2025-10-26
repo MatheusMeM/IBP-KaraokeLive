@@ -1,0 +1,43 @@
+{
+  "title": "Jingle IBP 2025",
+  "artist": "IBP",
+  "audio_file": "assets/audio/jingle_ibp.mp3",
+  "duration": 30,
+  "lines": [
+    {
+      "start": 0.0,
+      "end": 3.5,
+      "text": "IBP Inovação"
+    },
+    {
+      "start": 3.5,
+      "end": 7.0,
+      "text": "Energia do Futuro"
+    },
+    {
+      "start": 7.0,
+      "end": 11.0,
+      "text": "Transformando o Setor"
+    },
+    {
+      "start": 11.0,
+      "end": 15.0,
+      "text": "Com Sustentabilidade"
+    },
+    {
+      "start": 15.0,
+      "end": 20.0,
+      "text": "IBP, o futuro é agora"
+    },
+    {
+      "start": 20.0,
+      "end": 25.0,
+      "text": "Juntos construímos"
+    },
+    {
+      "start": 25.0,
+      "end": 30.0,
+      "text": "O amanhã melhor"
+    }
+  ]
+}

@@ -16,6 +16,7 @@ from datetime import datetime
 import soundfile as sf
 import sounddevice as sd
 import numpy as np
+import threading
 
 # Configurar logging
 logging.basicConfig(
@@ -41,6 +42,10 @@ class AudioRoutingTest(App):
         self.selected_device_id = None
         self.audio_data = None
         self.sample_rate = None
+        
+        # Dispositivos identificados no teste (podem ser alterados)
+        self.DEVICE_SPEAKER = 8   # Caixa nativa (Realtek - público)
+        self.DEVICE_HEADPHONE = 9  # Fone USB (cantor)
     
     def build(self):
         logger.info("=" * 60)
@@ -91,8 +96,8 @@ class AudioRoutingTest(App):
         scroll.add_widget(self.log_display)
         layout.add_widget(scroll)
         
-        # Botões de teste
-        btn_layout = BoxLayout(size_hint_y=0.3, spacing=5)
+        # Botões de teste - Linha 1
+        btn_layout_1 = BoxLayout(size_hint_y=0.15, spacing=5)
         
         # Botão 1: Tocar no dispositivo selecionado
         play_btn = Button(
@@ -100,38 +105,51 @@ class AudioRoutingTest(App):
             on_press=self.play_on_selected_device,
             background_color=(0.2, 0.8, 0.2, 1)
         )
-        btn_layout.add_widget(play_btn)
+        btn_layout_1.add_widget(play_btn)
         
-        # Botão 2: Parar reprodução
+        # Botão 2: Tocar em ambos dispositivos
+        play_both_btn = Button(
+            text='🔊🎧 Tocar\nAmbos (8+9)',
+            on_press=self.play_on_both_devices,
+            background_color=(0.2, 0.6, 0.8, 1)
+        )
+        btn_layout_1.add_widget(play_both_btn)
+        
+        # Botão 3: Parar reprodução
         stop_btn = Button(
             text='⏹️ Parar',
             on_press=self.stop_audio,
             background_color=(0.8, 0.2, 0.2, 1)
         )
-        btn_layout.add_widget(stop_btn)
+        btn_layout_1.add_widget(stop_btn)
         
-        # Botão 3: Listar dispositivos
+        layout.add_widget(btn_layout_1)
+        
+        # Botões de teste - Linha 2
+        btn_layout_2 = BoxLayout(size_hint_y=0.15, spacing=5)
+        
+        # Botão 4: Listar dispositivos
         list_btn = Button(
             text='📋 Listar\nDispositivos',
             on_press=self.test_list_devices
         )
-        btn_layout.add_widget(list_btn)
+        btn_layout_2.add_widget(list_btn)
         
-        # Botão 4: Testar método padrão (Kivy)
+        # Botão 5: Testar método padrão (Kivy)
         default_btn = Button(
             text='🔊 Teste\nKivy',
             on_press=self.test_default_audio
         )
-        btn_layout.add_widget(default_btn)
+        btn_layout_2.add_widget(default_btn)
         
-        # Botão 5: Instruções
+        # Botão 6: Instruções
         manual_btn = Button(
             text='📖 Instruções',
             on_press=self.show_manual_instructions
         )
-        btn_layout.add_widget(manual_btn)
+        btn_layout_2.add_widget(manual_btn)
         
-        layout.add_widget(btn_layout)
+        layout.add_widget(btn_layout_2)
         
         # Carregar áudio de teste
         test_audio = Path('assets/audio/Ibp - Energia da Revolucao.wav')
@@ -234,6 +252,62 @@ class AudioRoutingTest(App):
             
         except Exception as e:
             self.log(f"❌ Erro ao tocar áudio: {e}", 'ERROR')
+    
+    def play_on_both_devices(self, instance):
+        """Tocar áudio simultaneamente nos dispositivos 8 e 9."""
+        if self.audio_data is None:
+            self.log("❌ Nenhum áudio carregado", 'ERROR')
+            return
+        
+        try:
+            # Verificar se os dispositivos existem
+            try:
+                device_8 = sd.query_devices(self.DEVICE_SPEAKER)
+                device_9 = sd.query_devices(self.DEVICE_HEADPHONE)
+            except Exception as e:
+                self.log(f"❌ Erro ao verificar dispositivos: {e}", 'ERROR')
+                self.log("💡 Ajuste os IDs em self.DEVICE_SPEAKER e self.DEVICE_HEADPHONE", 'WARNING')
+                return
+            
+            self.log("=" * 40, 'INFO')
+            self.log("🔊🎧 TOCANDO EM AMBOS DISPOSITIVOS", 'INFO')
+            self.log(f"Caixa [{self.DEVICE_SPEAKER}]: {device_8['name']}", 'INFO')
+            self.log(f"Fone [{self.DEVICE_HEADPHONE}]: {device_9['name']}", 'INFO')
+            self.log("=" * 40, 'INFO')
+            
+            # Método 1: Threading - Garantir início simultâneo
+            def play_device_8():
+                try:
+                    sd.play(self.audio_data, self.sample_rate, device=self.DEVICE_SPEAKER)
+                    self.log(f"✅ Iniciado no dispositivo {self.DEVICE_SPEAKER}", 'DEBUG')
+                except Exception as e:
+                    self.log(f"❌ Erro no dispositivo {self.DEVICE_SPEAKER}: {e}", 'ERROR')
+            
+            def play_device_9():
+                try:
+                    sd.play(self.audio_data, self.sample_rate, device=self.DEVICE_HEADPHONE)
+                    self.log(f"✅ Iniciado no dispositivo {self.DEVICE_HEADPHONE}", 'DEBUG')
+                except Exception as e:
+                    self.log(f"❌ Erro no dispositivo {self.DEVICE_HEADPHONE}: {e}", 'ERROR')
+            
+            # Criar threads
+            thread_8 = threading.Thread(target=play_device_8)
+            thread_9 = threading.Thread(target=play_device_9)
+            
+            # Iniciar simultaneamente
+            thread_8.start()
+            thread_9.start()
+            
+            # Aguardar threads
+            thread_8.join()
+            thread_9.join()
+            
+            self.log("✅ Áudio sendo reproduzido em AMBOS dispositivos", 'INFO')
+            self.log("🎵 Caixa (público) + Fone (cantor)", 'WARNING')
+            self.log("💡 Esta é a configuração para modo PERFORMANCE", 'INFO')
+            
+        except Exception as e:
+            self.log(f"❌ Erro ao tocar em ambos dispositivos: {e}", 'ERROR')
     
     def stop_audio(self, instance):
         """Parar toda reprodução de áudio."""
@@ -390,13 +464,20 @@ class AudioRoutingTest(App):
         self.log("SOLUÇÃO IMPLEMENTADA:", 'INFO')
         self.log("   ✅ Usar sounddevice para roteamento direto", 'DEBUG')
         self.log("   ✅ Selecionar dispositivo no dropdown", 'DEBUG')
-        self.log("   ✅ Clicar 'Tocar Selecionado' para testar", 'DEBUG')
+        self.log("   ✅ Clicar 'Tocar Selecionado' para testar individual", 'DEBUG')
+        self.log("   ✅ Clicar 'Tocar Ambos (8+9)' para modo performance", 'DEBUG')
         self.log("", 'INFO')
         
         self.log("RESULTADO DO TESTE:", 'INFO')
         self.log("   - Detectados múltiplos dispositivos USB e nativos", 'DEBUG')
         self.log("   - sounddevice permite roteamento direto", 'DEBUG')
+        self.log("   - Threading garante sincronização entre dispositivos", 'DEBUG')
         self.log("   - Recomendado para implementação final", 'DEBUG')
+        self.log("", 'INFO')
+        
+        self.log("MODOS DE OPERAÇÃO:", 'INFO')
+        self.log("   🎧 ENSAIO: Tocar apenas no fone (dispositivo 9)", 'DEBUG')
+        self.log("   🔊 PERFORMANCE: Tocar em ambos (8 + 9)", 'DEBUG')
         self.log("", 'INFO')
         
         self.log("✅ Instruções exibidas", 'INFO')

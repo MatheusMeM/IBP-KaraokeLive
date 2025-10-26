@@ -33,3 +33,14 @@ IDLE_TIMEOUT = 60.0  # seconds before returning to welcome screen
 # DEVELOPMENT FLAGS
 # =============================================================================
 DEBUG_MODE = True  # Set to False for production
+
+# =============================================================================
+# KARAOKE PATHS (Phase 1: Core Modules)
+# =============================================================================
+AUDIO_FILE = 'assets/audio/jingle_ibp.mp3'
+LYRICS_FILE = 'data/lyrics.json'
+
+# =============================================================================
+# KARAOKE TIMING (Phase 1: Core Modules)
+# =============================================================================
+COUNTDOWN_SECONDS = 3
