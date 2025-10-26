@@ -24,13 +24,15 @@ class PerformanceScreen(Screen):
         self.audio_router = AudioRouter()
         self.lyric_display = LyricDisplay(LYRICS_FILE)
         
-        # Video background
+        # Video background - add first so it's behind everything
         self.video = Video(
             source='assets/video/Ibp - Energia da Revolução.mp4',
             state='stop',
             allow_stretch=True,
-            keep_ratio=True,
-            opacity=0
+            keep_ratio=False,  # Fill entire screen
+            opacity=0.5,  # Visible by default
+            size_hint=(1, 1),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
         self.add_widget(self.video)
         
@@ -38,24 +40,25 @@ class PerformanceScreen(Screen):
         from kivy.uix.floatlayout import FloatLayout
         from kivy.graphics import Color, Rectangle, RoundedRectangle
         
-        overlay = FloatLayout()
+        # Transparent overlay to hold UI elements
+        overlay = FloatLayout(size_hint=(1, 1))
         
-        # Container with semi-transparent background
+        # Container with semi-transparent background - smaller, in corner
         container = BoxLayout(
             orientation='vertical',
-            padding=30,
-            spacing=15,
-            size_hint=(0.9, 0.7),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            padding=20,
+            spacing=10,
+            size_hint=(0.35, 0.25),  # Smaller container
+            pos_hint={'right': 0.98, 'top': 0.98}  # Top-right corner
         )
         
         # Add semi-transparent black background to container
         with container.canvas.before:
-            Color(0, 0, 0, 0.6)  # Semi-transparent black
+            Color(0, 0, 0, 0.7)  # More opaque for better readability
             self.container_bg = RoundedRectangle(
                 pos=container.pos,
                 size=container.size,
-                radius=[20]
+                radius=[15]
             )
         
         # Bind to update background when container moves/resizes
@@ -64,62 +67,87 @@ class PerformanceScreen(Screen):
             size=self._update_container_bg
         )
         
-        # Título "AO VIVO" com sombra forte
-        title = Label(
-            text='🔴 PERFORMANCE AO VIVO',
-            font_size='45sp',
-            bold=True,
-            color=(1, 0.2, 0.2, 1),  # Vermelho brilhante
-            size_hint_y=0.1,
-            outline_width=3,
-            outline_color=(0, 0, 0, 1)
-        )
-        container.add_widget(title)
-        
-        # Linha anterior (cinza com sombra)
-        self.prev_label = Label(
-            text='',
-            font_size='28sp',
-            color=(0.7, 0.7, 0.7, 1),
-            size_hint_y=0.2,
-            outline_width=1,
-            outline_color=(0, 0, 0, 1)
-        )
-        container.add_widget(self.prev_label)
-        
-        # Linha atual (amarelo brilhante com sombra forte)
-        self.current_label = Label(
-            text='Aguarde...',
-            font_size='60sp',
-            bold=True,
-            color=(1, 1, 0, 1),
-            size_hint_y=0.4,
-            outline_width=3,
-            outline_color=(0, 0, 0, 1)
-        )
-        container.add_widget(self.current_label)
-        
-        # Próxima linha (branco com sombra)
-        self.next_label = Label(
-            text='',
-            font_size='32sp',
-            color=(0.9, 0.9, 0.9, 1),
-            size_hint_y=0.2,
-            outline_width=1,
-            outline_color=(0, 0, 0, 1)
-        )
-        container.add_widget(self.next_label)
-        
-        # Timer (branco com sombra)
+        # Timer (white, small)
         self.timer_label = Label(
             text='0:00 / 0:00',
-            font_size='24sp',
-            size_hint_y=0.1,
+            font_size='18sp',
+            size_hint_y=0.3,
             color=(1, 1, 1, 1),
-            outline_width=1,
-            outline_color=(0, 0, 0, 1)
+            halign='center'
         )
         container.add_widget(self.timer_label)
+        
+        # Mode indicator with LIVE indicator
+        mode_label = Label(
+            text='🔴 AO VIVO',
+            font_size='20sp',
+            bold=True,
+            size_hint_y=0.4,
+            color=(1, 0.2, 0.2, 1),  # Red
+            halign='center'
+        )
+        container.add_widget(mode_label)
+        
+        # Status indicator
+        self.status_label = Label(
+            text='🎤',
+            font_size='30sp',
+            size_hint_y=0.3,
+            color=(1, 1, 1, 1)
+        )
+        container.add_widget(self.status_label)
+        
+        # Lyrics - Large, prominent, centered on screen
+        lyrics_container = FloatLayout(
+            size_hint=(0.9, 0.5),
+            pos_hint={'center_x': 0.5, 'center_y': 0.4}
+        )
+        
+        lyrics_box = BoxLayout(
+            orientation='vertical',
+            spacing=10,
+            size_hint=(1, 1)
+        )
+        
+        # Previous line (gray)
+        self.prev_label = Label(
+            text='',
+            font_size='35sp',
+            color=(0.6, 0.6, 0.6, 1),
+            size_hint_y=0.25,
+            outline_width=2,
+            outline_color=(0, 0, 0, 1),
+            halign='center'
+        )
+        lyrics_box.add_widget(self.prev_label)
+        
+        # Current line (yellow, large, prominent)
+        self.current_label = Label(
+            text='Aguarde...',
+            font_size='70sp',
+            bold=True,
+            color=(1, 1, 0, 1),
+            size_hint_y=0.5,
+            outline_width=4,
+            outline_color=(0, 0, 0, 1),
+            halign='center'
+        )
+        lyrics_box.add_widget(self.current_label)
+        
+        # Next line (white)
+        self.next_label = Label(
+            text='',
+            font_size='40sp',
+            color=(0.9, 0.9, 0.9, 1),
+            size_hint_y=0.25,
+            outline_width=2,
+            outline_color=(0, 0, 0, 1),
+            halign='center'
+        )
+        lyrics_box.add_widget(self.next_label)
+        
+        lyrics_container.add_widget(lyrics_box)
+        overlay.add_widget(lyrics_container)
         
         overlay.add_widget(container)
         self.add_widget(overlay)
@@ -199,11 +227,19 @@ class PerformanceScreen(Screen):
     
     def finish_performance(self):
         """Finalizar e ir para congratulations."""
+        print("🎬 Finishing performance...")
+        
         if self.update_event:
             self.update_event.cancel()
+            self.update_event = None
         
+        # Stop audio completely
         self.audio_router.stop()
+        self.audio_router.is_playing_flag = False
+        
+        # Stop and reset video
         self.video.state = 'stop'
+        self.video.opacity = 0
         
         # Ir para tela de parabéns
         self.manager.current = 'congratulations'

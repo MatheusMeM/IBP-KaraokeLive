@@ -93,26 +93,34 @@
             pos: self.pos
             size: self.size
     
-    Image:
-        source: 'assets/images/background_graphic.png'
-        allow_stretch: True
-        keep_ratio: False
-        opacity: 0.15
+    FloatLayout:
+        Image:
+            source: 'assets/images/background_graphic.png'
+            allow_stretch: True
+            keep_ratio: False
+            opacity: 0.15
+        
+        # Countdown number with IBP branding
+        Label:
+            id: countdown_label
+            text: root.label.text if hasattr(root, 'label') else '3'
+            font_name: 'Roboto'
+            font_size: '250sp'
+            bold: True
+            color: color_primary_blue
+            outline_width: 5
+            outline_color: color_primary_green
+            halign: 'center'
+            valign: 'middle'
 
 <RehearsalScreen>:
     name: 'rehearsal'
     canvas.before:
         Color:
-            rgba: color_white
+            rgba: (0, 0, 0, 1)  # Black background for video
         Rectangle:
             pos: self.pos
             size: self.size
-    
-    Image:
-        source: 'assets/images/background_graphic.png'
-        allow_stretch: True
-        keep_ratio: False
-        opacity: 0.15
 
 <CTAScreen>:
     name: 'cta'
@@ -123,26 +131,70 @@
             pos: self.pos
             size: self.size
     
-    Image:
-        source: 'assets/images/background_graphic.png'
-        allow_stretch: True
-        keep_ratio: False
-        opacity: 0.15
+    FloatLayout:
+        Image:
+            source: 'assets/images/background_graphic.png'
+            allow_stretch: True
+            keep_ratio: False
+            opacity: 0.15
+        
+        # Content container
+        BoxLayout:
+            orientation: 'vertical'
+            padding: screen_padding
+            spacing: dp(40)
+            size_hint: (0.8, 0.7)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            
+            # Top spacer
+            Widget:
+                size_hint_y: 0.1
+            
+            # Title
+            BrandedLabel:
+                text: '🎉 ÓTIMO ENSAIO!'
+                font_size: '70sp'
+                bold: True
+                color: color_primary_green
+                size_hint_y: 0.2
+            
+            # Message box
+            BoxLayout:
+                size_hint_y: 0.4
+                padding: dp(40)
+                canvas.before:
+                    Color:
+                        rgba: color_light_gray
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(30)]
+                
+                BrandedLabel:
+                    text: 'Agora é pra valer!\\n\\nCante com confiança e mostre seu talento.\\n\\nPronto para começar?'
+                    font_size: '42sp'
+                    text_size: self.width, None
+                    halign: 'center'
+                    valign: 'middle'
+            
+            # Start button
+            BrandedButton:
+                text: '▶ VALENDO!'
+                size_hint_y: 0.15
+                on_press: root.start_performance(self)
+            
+            # Bottom spacer
+            Widget:
+                size_hint_y: 0.15
 
 <PerformanceScreen>:
     name: 'performance'
     canvas.before:
         Color:
-            rgba: color_white
+            rgba: (0, 0, 0, 1)  # Black background for video
         Rectangle:
             pos: self.pos
             size: self.size
-    
-    Image:
-        source: 'assets/images/background_graphic.png'
-        allow_stretch: True
-        keep_ratio: False
-        opacity: 0.15
 
 <CongratulationsScreen>:
     name: 'congratulations'
@@ -153,11 +205,69 @@
             pos: self.pos
             size: self.size
     
-    Image:
-        source: 'assets/images/background_graphic.png'
-        allow_stretch: True
-        keep_ratio: False
-        opacity: 0.15
+    FloatLayout:
+        Image:
+            source: 'assets/images/background_graphic.png'
+            allow_stretch: True
+            keep_ratio: False
+            opacity: 0.15
+        
+        # IBP Logo at top
+        Image:
+            source: 'assets/images/ibp_logo_simples.png'
+            size_hint: (None, None)
+            size: (dp(200), dp(80))
+            pos_hint: {'center_x': 0.5, 'top': 0.95}
+            allow_stretch: True
+            keep_ratio: True
+        
+        # Content container
+        BoxLayout:
+            orientation: 'vertical'
+            padding: screen_padding
+            spacing: dp(40)
+            size_hint: (0.8, 0.65)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+            
+            # Title
+            BrandedLabel:
+                text: '🎉 PARABÉNS! 🎉'
+                font_size: '80sp'
+                bold: True
+                color: (1, 0.7, 0, 1)
+                size_hint_y: 0.3
+                outline_width: 3
+                outline_color: color_primary_blue
+            
+            # Message box
+            BoxLayout:
+                size_hint_y: 0.4
+                padding: dp(40)
+                canvas.before:
+                    Color:
+                        rgba: color_light_gray
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(30)]
+                
+                BrandedLabel:
+                    text: 'Você arrasou no karaoke!\\n\\nObrigado por participar da\\nativação IBP 2025'
+                    font_size: '45sp'
+                    text_size: self.width, None
+                    halign: 'center'
+                    valign: 'middle'
+            
+            # Restart button
+            BrandedButton:
+                text: '🔄 JOGAR NOVAMENTE'
+                size_hint_y: 0.2
+                font_size: '45sp'
+                on_press: root.restart(self)
+            
+            # Bottom spacer
+            Widget:
+                size_hint_y: 0.1
 
 <InstructionsScreen>:
     name: 'instructions'
