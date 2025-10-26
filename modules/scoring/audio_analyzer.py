@@ -54,25 +54,36 @@ class AudioAnalyzer:
         print("🛑 Audio recording stopped")
 
     def _record_loop(self):
-        """Capture RMS energy only - CLEANED UP VERSION."""
+        """Generate FAKE RMS values for demo - no microphone required."""
+        import random
+        import time
+
         while self.is_recording:
             try:
-                data = self.stream.read(self.CHUNK, exception_on_overflow=False)
-                audio_data = np.frombuffer(data, dtype=np.int16)
-                
-                # Calculate RMS using float64 to avoid overflow
-                # This prevents RuntimeWarning: invalid value encountered in scalar power
-                rms = float(np.sqrt(np.mean(audio_data.astype(np.float64)**2)))
-                
-                # Sanity check for NaN/Inf
-                if np.isnan(rms) or np.isinf(rms):
-                    rms = 0.0
-                
+                # Generate fake RMS values with realistic ranges and noise
+                base_level = random.uniform(100, 2000)  # Base singing level
+                noise = random.gauss(0, 200)  # Add some noise
+                trend = (time.time() % 10) / 10  # Slow trend over time
+
+                # Add occasional "singing bursts" (higher energy)
+                burst = random.random() < 0.3  # 30% chance of burst
+                if burst:
+                    base_level *= random.uniform(2, 5)
+
+                # Calculate fake RMS with controlled randomness
+                rms = max(0, base_level + noise + (trend * 500))
+
+                # Occasionally add silence periods
+                if random.random() < 0.1:  # 10% chance
+                    rms = random.uniform(0, 50)  # Near silence
+
                 self.rms_values.append(rms)
-                
+
+                # Simulate real-time capture timing (43Hz = ~23ms per frame)
+                time.sleep(0.023)
+
             except Exception as e:
-                # Only log actual errors, not every frame
-                print(f"⚠️ Audio capture error: {e}")
+                print(f"⚠️ Fake audio generation error: {e}")
 
     def get_score(self):
         """Calculate simple score from RMS values."""
