@@ -1,0 +1,3 @@
+# IBP-KaraokeLive Phase 0 Requirements
+kivy>=2.3.0
+# Future phases will add: ffpyplayer, aubio, etc.
