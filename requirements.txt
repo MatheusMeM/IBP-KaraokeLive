@@ -1,3 +1,8 @@
-# IBP-KaraokeLive Phase 0 Requirements
+# Interface
 kivy>=2.3.0
-# Future phases will add: ffpyplayer, aubio, etc.
+
+# Audio routing
+sounddevice>=0.5.3
+soundfile>=0.13.1
+numpy>=2.3.4
+
