@@ -1,1 +1,14 @@
-[]
+{
+    "scores": [
+        {
+            "name": "TEST USER",
+            "score": 9500,
+            "timestamp": "2025-10-26T21:00:00"
+        },
+        {
+            "name": "ASASA",
+            "score": 0,
+            "timestamp": "2025-10-26T18:55:47.396602"
+        }
+    ]
+}

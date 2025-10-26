@@ -25,26 +25,21 @@ class LeaderboardScreen(Screen):
         self.load_leaderboard()
 
     def load_leaderboard(self):
-        """Load leaderboard data from JSON file."""
+        """Load TODAY'S leaderboard using RankingManager."""
         try:
-            with open('data/leaderboard.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-
-            if not data:
-                self.status_text = "Nenhum score registrado ainda.\nSeja o primeiro a jogar!"
+            from data.ranking_manager import RankingManager
+            
+            ranking = RankingManager()
+            today_scores = ranking.get_today_scores()  # Already filtered by date
+            
+            if not today_scores:
+                self.status_text = "Nenhum score hoje.\nSeja o primeiro!"
                 self.leaderboard_data = []
             else:
-                # Sort by score descending
-                sorted_data = sorted(data, key=lambda x: x.get('score', 0), reverse=True)
-                self.leaderboard_data = sorted_data[:10]  # Top 10
-                self.status_text = f"Top {len(self.leaderboard_data)} jogadores"
-
-        except FileNotFoundError:
-            self.status_text = "Arquivo de ranking não encontrado."
-            self.leaderboard_data = []
-        except json.JSONDecodeError:
-            self.status_text = "Erro ao carregar ranking."
-            self.leaderboard_data = []
+                # Already sorted by RankingManager
+                self.leaderboard_data = today_scores[:10]  # Top 10
+                self.status_text = f"Top {len(self.leaderboard_data)} de Hoje"
+                
         except Exception as e:
             self.status_text = f"Erro: {str(e)}"
             self.leaderboard_data = []

@@ -33,6 +33,7 @@ from ui.screens.countdown_screen import CountdownScreen
 from ui.screens.rehearsal_screen import RehearsalScreen
 from ui.screens.cta_screen import CTAScreen
 from ui.screens.performance_screen import PerformanceScreen
+from ui.screens.score_entry_screen import ScoreEntryScreen
 from ui.screens.congratulations_screen import (
     CongratulationsScreen
 )
@@ -61,6 +62,7 @@ class KaraokeApp(App):
         sm.add_widget(RehearsalScreen(name='rehearsal'))
         sm.add_widget(CTAScreen(name='cta'))
         sm.add_widget(PerformanceScreen(name='performance'))
+        sm.add_widget(ScoreEntryScreen(name='score_entry'))
         sm.add_widget(
             CongratulationsScreen(name='congratulations')
         )

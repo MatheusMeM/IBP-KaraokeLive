@@ -5,23 +5,11 @@ kivy>=2.3.0
 pillow>=10.0.0
 ffpyplayer>=4.5.0
 
-# Audio routing
+# Audio routing and processing
 sounddevice>=0.5.3
 soundfile>=0.13.1
 numpy>=2.3.4
-
+pyaudio>=0.2.14
 
 # WebVTT parsing
 webvtt-py==0.4.6
-
-# Interface
-kivy>=2.3.0
-
-# Video playback (required for Kivy Video widget)
-pillow>=10.0.0
-ffpyplayer>=4.5.0
-
-# Audio routing
-sounddevice>=0.5.3
-soundfile>=0.13.1
-numpy>=2.3.4

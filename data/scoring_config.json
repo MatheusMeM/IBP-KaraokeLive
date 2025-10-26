@@ -1,0 +1,6 @@
+{
+  "silence_threshold": 500,
+  "min_rms_good": 1000,
+  "max_rms_cap": 5000,
+  "min_coverage_percent": 80
+}

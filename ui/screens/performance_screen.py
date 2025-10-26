@@ -14,6 +14,7 @@ from kivy.graphics import Color, Rectangle
 
 from modules.audio_router import AudioRouter
 from modules.lyric_display import LyricDisplay
+from modules.scoring.audio_analyzer import AudioAnalyzer
 from config.app_config import LYRICS_FILE
 
 
@@ -26,6 +27,7 @@ class PerformanceScreen(Screen):
         # Componentes de áudio
         self.audio_router = AudioRouter()
         self.lyric_display = LyricDisplay(LYRICS_FILE)
+        self.audio_analyzer = AudioAnalyzer()
         
         # Video background - add first so it's behind everything
         self.video = Video(
@@ -171,6 +173,11 @@ class PerformanceScreen(Screen):
         
         # Agendar atualização (60 FPS para animações suaves)
         self.update_event = Clock.schedule_interval(self.update, 1/60)
+
+        # After existing setup...
+        self.audio_analyzer.clear()
+        self.audio_analyzer.start_recording()
+        print("🎤 Recording started")
     
     def _on_keyboard(self, window, key, scancode, codepoint, modifier):
         """Handle keyboard shortcuts for development."""
@@ -229,22 +236,33 @@ class PerformanceScreen(Screen):
             self.finish_performance()
     
     def finish_performance(self):
-        """Finalizar e ir para congratulations."""
+        """Calculate score and navigate to score entry."""
         print("🎬 Finishing performance...")
-        
+
+        # Stop recording
+        self.audio_analyzer.stop_recording()
+
+        # Calculate score
+        score = self.audio_analyzer.get_score()
+        print(f"🎯 Score: {score}/100")
+
+        # Cleanup
         if self.update_event:
             self.update_event.cancel()
             self.update_event = None
-        
-        # Stop audio completely
+
         self.audio_router.stop()
-        
-        # Stop and reset video
         self.video.state = 'stop'
+
+        # Add at the end
+        if hasattr(self, 'audio_analyzer'):
+            self.audio_analyzer.stop_recording()
         self.video.opacity = 0
-        
-        # Ir para tela de parabéns
-        self.manager.current = 'congratulations'
+
+        # Navigate to score entry (will create next)
+        score_entry = self.manager.get_screen('score_entry')
+        score_entry.set_score(score)
+        self.manager.current = 'score_entry'
     
     def on_leave(self):
         """Cleanup."""

@@ -31,6 +31,7 @@ class RankingManager:
     def load_leaderboard(self) -> List[Dict]:
         """
         Load the leaderboard data from JSON file.
+        Handles both legacy format (list) and new format (dict with "scores" key).
         
         Returns:
             List of score dictionaries with keys: 'name', 'score', 'timestamp'
@@ -38,7 +39,17 @@ class RankingManager:
         try:
             with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                return data.get("scores", [])
+                
+                # Handle both formats for backward compatibility
+                if isinstance(data, list):
+                    # Legacy format: bare list
+                    return data
+                elif isinstance(data, dict):
+                    # New format: dict with "scores" key
+                    return data.get("scores", [])
+                else:
+                    print(f"Warning: Unexpected data type in {LEADERBOARD_FILE}: {type(data)}")
+                    return []
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Warning: Could not load {LEADERBOARD_FILE}: {e}")
             return []
@@ -125,23 +136,23 @@ class RankingManager:
     
     def get_today_scores(self) -> List[Dict]:
         """
-        Get all scores from today only.
-        
+        Get TODAY'S scores only for leaderboard display.
+
         Returns:
-            List of today's score entries
+            List of today's score entries sorted by score descending
         """
         from datetime import datetime
-        
+
         all_scores = self.load_leaderboard()
         current_date = datetime.now().strftime('%Y-%m-%d')
-        
+
         today_scores = []
         for score in all_scores:
             timestamp_str = score.get('timestamp', '')
             if timestamp_str:
-                # Extract date from ISO timestamp (YYYY-MM-DDTHH:MM:SS)
                 score_date = timestamp_str.split('T')[0]
                 if score_date == current_date:
                     today_scores.append(score)
-        
-        return today_scores
+
+        # Sort by score descending
+        return sorted(today_scores, key=lambda x: x['score'], reverse=True)
