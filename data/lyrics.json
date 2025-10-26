@@ -1,43 +1,73 @@
 {
-  "title": "Jingle IBP 2025",
+  "title": "Ibp - Energia da Revolucao",
   "artist": "IBP",
-  "audio_file": "assets/audio/jingle_ibp.mp3",
-  "duration": 30,
+  "audio_file": "assets/audio/Ibp - Energia da Revolucao.wav",
+  "duration": 43.979,
   "lines": [
     {
-      "start": 0.0,
-      "end": 3.5,
-      "text": "IBP Inovação"
+      "start": 4.52,
+      "end": 6.752,
+      "text": "No tênis que eu calço, no asfalto que eu piso,"
     },
     {
-      "start": 3.5,
-      "end": 7.0,
-      "text": "Energia do Futuro"
+      "start": 6.777,
+      "end": 9.346,
+      "text": "tá no fone que eu uso, no corre que eu vivo"
     },
     {
-      "start": 7.0,
-      "end": 11.0,
-      "text": "Transformando o Setor"
+      "start": 9.371,
+      "end": 11.713,
+      "text": "Na prancha da surfista, no manto do meu time,"
     },
     {
-      "start": 11.0,
-      "end": 15.0,
-      "text": "Com Sustentabilidade"
+      "start": 11.738,
+      "end": 14.41,
+      "text": "tá no carro, tá na tinta e no disco que define"
     },
     {
-      "start": 15.0,
-      "end": 20.0,
-      "text": "IBP, o futuro é agora"
+      "start": 14.437,
+      "end": 16.912,
+      "text": "É minha energia, a nossa evolução,"
     },
     {
-      "start": 20.0,
-      "end": 25.0,
-      "text": "Juntos construímos"
+      "start": 16.937,
+      "end": 19.426,
+      "text": "com tecnologia pra uma revolução"
     },
     {
-      "start": 25.0,
-      "end": 30.0,
-      "text": "O amanhã melhor"
+      "start": 19.451,
+      "end": 21.921,
+      "text": "Com muita inovação e sustentabilidade"
+    },
+    {
+      "start": 21.946,
+      "end": 24.433,
+      "text": "pra uma transição segura de verdade!"
+    },
+    {
+      "start": 24.458,
+      "end": 28.328,
+      "text": "A energia da evolução (x4)"
+    },
+    {
+      "start": 28.353,
+      "end": 29.591,
+      "text": "A energia da evolução (x4) (A energia)"
+    },
+    {
+      "start": 29.616,
+      "end": 34.598,
+      "text": "A energia da evolução (x4)"
+    },
+    {
+      "start": 34.623,
+      "end": 39.573,
+      "text": "A energia da evolução (x4)"
+    },
+    {
+      "start": 39.614,
+      "end": 43.979,
+      "text": "A energia da evolução (x4)"
     }
   ]
 }

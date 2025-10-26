@@ -1,5 +1,6 @@
 """
 Tela de ensaio - música com letras (apenas fone).
+Versão melhorada com animações de karaoke profissionais.
 """
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
@@ -17,7 +18,7 @@ from config.app_config import LYRICS_FILE
 
 
 class RehearsalScreen(Screen):
-    """Tela de ensaio do karaoke."""
+    """Tela de ensaio do karaoke com animações suaves."""
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -31,22 +32,22 @@ class RehearsalScreen(Screen):
             source='assets/video/Ibp - Energia da Revolucao.mp4',
             state='stop',
             allow_stretch=True,
-            keep_ratio=False,  # Fill entire screen
+            keep_ratio=False,
             opacity=1,
-            volume=0,  # Mute video audio to avoid interference
+            volume=0,
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
         self.add_widget(self.video)
         
-        # BLACK STRIP - BOTTOM 10%
+        # BLACK STRIP - BOTTOM 8.5%
         subtitle_blocker_lower = BoxLayout(
             size_hint=(1, 0.085),
             pos_hint={'x': 0, 'y': 0}
         )
         with subtitle_blocker_lower.canvas.before:
             Color(0, 0, 0, 1) 
-            self.blocker_bg_lower = Rectangle(  # ✅ Unique name!
+            self.blocker_bg_lower = Rectangle(
                 pos=subtitle_blocker_lower.pos,
                 size=subtitle_blocker_lower.size
             )
@@ -56,14 +57,14 @@ class RehearsalScreen(Screen):
         )
         self.add_widget(subtitle_blocker_lower)
         
-        # BLACK STRIP - TOP 10%
+        # BLACK STRIP - TOP 8%
         subtitle_blocker_upper = BoxLayout(
             size_hint=(1, 0.08),
             pos_hint={'x': 0, 'y': 0.92}
         )
         with subtitle_blocker_upper.canvas.before:
             Color(0, 0, 0, 1) 
-            self.blocker_bg_upper = Rectangle(  # ✅ Unique name!
+            self.blocker_bg_upper = Rectangle(
                 pos=subtitle_blocker_upper.pos,
                 size=subtitle_blocker_upper.size
             )
@@ -73,40 +74,44 @@ class RehearsalScreen(Screen):
         )
         self.add_widget(subtitle_blocker_upper)
         
-        # Lyrics - Large, prominent, centered on screen
+        # Lyrics container - centered on screen
         lyrics_container = FloatLayout(
             size_hint=(1, 1)
         )
         
+        # Vertical layout for 3-line karaoke display
         lyrics_box = BoxLayout(
             orientation='vertical',
-            spacing=20,
-            size_hint=(0.9, 0.4),
+            spacing=15,
+            size_hint=(0.95, None),
+            height=300,
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
         )
         
-        # Previous line (gray, smaller)
+        # Previous line (TOP) - cinza, menor, desbotada
         self.prev_label = Label(
             text='',
-            font_size='40sp',
-            color=(0.6, 0.6, 0.6, 1),
-            size_hint_y=0.2,
-            outline_width=2,
-            outline_color=(0, 0, 0, 1),
+            font_size='35sp',
+            color=(0.5, 0.5, 0.5, 0.7),
+            size_hint_y=None,
+            height=50,
+            outline_width=1,
+            outline_color=(0, 0, 0, 0.8),
             halign='center',
-            valign='middle'
+            valign='bottom'
         )
         self.prev_label.bind(size=self.prev_label.setter('text_size'))
         lyrics_box.add_widget(self.prev_label)
         
-        # Current line (yellow, large, prominent)
+        # Current line (MEIO) - AMARELO, grande, negrito - DESTAQUE MÁXIMO!
         self.current_label = Label(
-            text='Aguarde...',
-            font_size='80sp',
+            text='',
+            font_size='70sp',
             bold=True,
-            color=(1, 1, 0, 1),
-            size_hint_y=0.6,
-            outline_width=4,
+            color=(1, 1, 0, 1),  # Amarelo vibrante
+            size_hint_y=None,
+            height=120,
+            outline_width=3,
             outline_color=(0, 0, 0, 1),
             halign='center',
             valign='middle'
@@ -114,16 +119,17 @@ class RehearsalScreen(Screen):
         self.current_label.bind(size=self.current_label.setter('text_size'))
         lyrics_box.add_widget(self.current_label)
         
-        # Next line (white, medium)
+        # Next line (EMBAIXO) - branca, tamanho médio
         self.next_label = Label(
             text='',
-            font_size='45sp',
-            color=(0.9, 0.9, 0.9, 1),
-            size_hint_y=0.2,
+            font_size='40sp',
+            color=(0.95, 0.95, 0.95, 0.85),
+            size_hint_y=None,
+            height=60,
             outline_width=2,
-            outline_color=(0, 0, 0, 1),
+            outline_color=(0, 0, 0, 0.9),
             halign='center',
-            valign='middle'
+            valign='top'
         )
         self.next_label.bind(size=self.next_label.setter('text_size'))
         lyrics_box.add_widget(self.next_label)
@@ -131,6 +137,8 @@ class RehearsalScreen(Screen):
         lyrics_container.add_widget(lyrics_box)
         self.add_widget(lyrics_container)
         
+        # Track last displayed line for smooth transitions
+        self.last_current_text = ''
         self.update_event = None
     
     def on_enter(self):
@@ -154,11 +162,14 @@ class RehearsalScreen(Screen):
         anim = Animation(opacity=1, duration=1.5)
         anim.start(self.video)
         
+        # Reset lyrics
+        self.last_current_text = ''
+        
         # Tocar música via AudioRouter
         self.audio_router.play()
         
-        # Agendar atualização
-        self.update_event = Clock.schedule_interval(self.update, 1/30)
+        # Agendar atualização (60 FPS para animações suaves)
+        self.update_event = Clock.schedule_interval(self.update, 1/60)
     
     def _on_keyboard(self, window, key, scancode, codepoint, modifier):
         """Handle keyboard shortcuts for development."""
@@ -169,17 +180,48 @@ class RehearsalScreen(Screen):
             return True
         return False
     
+    def _animate_line_change(self):
+        """Animar transição suave quando a linha muda."""
+        # Fade in + scale up da linha atual
+        self.current_label.opacity = 0
+        self.current_label.font_size = 60  # Número, não string
+        
+        anim = Animation(
+            opacity=1,
+            font_size=70,  # Número, não string
+            duration=0.3,
+            transition='out_cubic'
+        )
+        anim.start(self.current_label)
+        
+        # Fade in das outras linhas
+        self.prev_label.opacity = 0
+        self.next_label.opacity = 0
+        
+        Animation(opacity=0.7, duration=0.3).start(self.prev_label)
+        Animation(opacity=0.85, duration=0.3).start(self.next_label)
+    
     def update(self, dt):
-        """Atualizar letras."""
+        """Atualizar letras com animações suaves."""
         # Tempo atual via AudioRouter
         current_time = self.audio_router.get_position()
         
-        # Atualizar letras
+        # Atualizar letras via sliding window
         lines = self.lyric_display.get_context_lines(current_time)
         
-        self.prev_label.text = lines['prev'] or ''
-        self.current_label.text = lines['current'] or 'Aguarde...'
-        self.next_label.text = lines['next'] or ''
+        # Detectar mudança de linha para animar
+        new_current = lines['current'] or ''
+        line_changed = new_current != self.last_current_text and new_current != ''
+        
+        # Atualizar textos (vazio se None - SEM "Aguarde...")
+        self.prev_label.text = lines['prev'] if lines['prev'] else ''
+        self.current_label.text = lines['current'] if lines['current'] else ''
+        self.next_label.text = lines['next'] if lines['next'] else ''
+        
+        # Animar apenas se mudou para uma linha válida
+        if line_changed:
+            self._animate_line_change()
+            self.last_current_text = new_current
         
         # Verificar fim
         if not self.audio_router.is_playing():
@@ -209,5 +251,7 @@ class RehearsalScreen(Screen):
         
         if self.update_event:
             self.update_event.cancel()
+            self.update_event = None
+        
         self.audio_router.stop()
         self.video.state = 'stop'

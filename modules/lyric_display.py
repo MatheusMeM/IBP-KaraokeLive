@@ -36,11 +36,11 @@ class LyricLine:
 
 class LyricDisplay:
     """
-    Lyric synchronization manager.
+    Lyric synchronization manager with sliding window context.
 
     Loads lyrics from JSON file and provides synchronized access to
-    lyric lines based on current playback time. Does not handle audio
-    playback or UI rendering - those are separate concerns.
+    lyric lines based on current playback time. Uses a sliding window
+    approach to show previous, current, and next lines.
     """
 
     def __init__(self, lyrics_file: str):
@@ -52,16 +52,14 @@ class LyricDisplay:
         """
         self.lyrics_file = Path(lyrics_file)
         self.lines: List[LyricLine] = []
-        self.current_index = 0
+        self.current_index = -1  # Start with no active line
 
         self._load()
 
     def _load(self):
         """Load and parse lyrics from JSON file."""
         if not self.lyrics_file.exists():
-            print(
-                f"❌ Lyrics file not found: {self.lyrics_file}"
-            )
+            print(f"❌ Lyrics file not found: {self.lyrics_file}")
             return
 
         with open(self.lyrics_file, 'r', encoding='utf-8') as f:
@@ -93,17 +91,18 @@ class LyricDisplay:
                 self.current_index = i
                 return line
 
+        # No line active at this time
+        self.current_index = -1
         return None
 
-    def get_context_lines(
-        self,
-        current_time: float
-    ) -> Dict[str, Optional[str]]:
+    def get_context_lines(self, current_time: float) -> Dict[str, Optional[str]]:
         """
-        Get previous, current, and next lyric lines for context.
+        Get previous, current, and next lyric lines using sliding window.
 
-        Provides context for UI display, showing what was sung, what
-        should be sung now, and what's coming next.
+        Provides context for UI display in karaoke style:
+        - prev: Line that was just sung (if any)
+        - current: Line being sung right now (if any)
+        - next: Line coming up next (if any)
 
         Args:
             current_time: Current playback position in seconds
@@ -112,6 +111,7 @@ class LyricDisplay:
             Dict with keys 'prev', 'current', 'next' mapping to lyric
             text strings or None if not available
         """
+        # Get current active line
         current = self.get_current_line(current_time)
 
         result = {
@@ -120,19 +120,21 @@ class LyricDisplay:
             'next': None
         }
 
-        if not current:
+        # If no active line, return empty window
+        if current is None:
             return result
 
+        # We have an active line at self.current_index
         idx = self.current_index
 
-        # Previous line
+        # Previous line (the one that was sung before current)
         if idx > 0:
             result['prev'] = self.lines[idx - 1].text
 
-        # Current line
+        # Current line (being sung now)
         result['current'] = current.text
 
-        # Next line
+        # Next line (coming up after current finishes)
         if idx < len(self.lines) - 1:
             result['next'] = self.lines[idx + 1].text
 
