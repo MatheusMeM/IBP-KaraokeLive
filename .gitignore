@@ -209,3 +209,8 @@ __marimo__/
 
 # Reference code (not part of project)
 ref_code/
+
+# Test documentation (local only)
+AUDIO-ROUTING-TEST-RESULTS.md
+TEST-AUDIO-ROUTING.md
+audio_routing_test.log
