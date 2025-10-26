@@ -82,19 +82,19 @@ class RehearsalScreen(Screen):
         # Vertical layout for 3-line karaoke display
         lyrics_box = BoxLayout(
             orientation='vertical',
-            spacing=15,
+            spacing=20,
             size_hint=(0.95, None),
-            height=300,
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            height=350,
+            pos_hint={'center_x': 0.5, 'center_y': 0.25}
         )
         
         # Previous line (TOP) - cinza, menor, desbotada
         self.prev_label = Label(
             text='',
-            font_size='35sp',
-            color=(0.5, 0.5, 0.5, 0.7),
+            font_size='60sp',
+            color=(0.5, 0.5, 0.5, 0.8),
             size_hint_y=None,
-            height=50,
+            height=70,
             outline_width=1,
             outline_color=(0, 0, 0, 0.8),
             halign='center',
@@ -106,11 +106,11 @@ class RehearsalScreen(Screen):
         # Current line (MEIO) - AMARELO, grande, negrito - DESTAQUE MÁXIMO!
         self.current_label = Label(
             text='',
-            font_size='70sp',
+            font_size='80sp',
             bold=True,
-            color=(1, 1, 0, 1),  # Amarelo vibrante
+            color=(1, 1, 0, 1),
             size_hint_y=None,
-            height=120,
+            height=100,
             outline_width=3,
             outline_color=(0, 0, 0, 1),
             halign='center',
@@ -122,10 +122,10 @@ class RehearsalScreen(Screen):
         # Next line (EMBAIXO) - branca, tamanho médio
         self.next_label = Label(
             text='',
-            font_size='40sp',
-            color=(0.95, 0.95, 0.95, 0.85),
+            font_size='70sp',
+            color=(0.95, 0.95, 0.95, 0.95),
             size_hint_y=None,
-            height=60,
+            height=80,
             outline_width=2,
             outline_color=(0, 0, 0, 0.9),
             halign='center',
@@ -184,11 +184,11 @@ class RehearsalScreen(Screen):
         """Animar transição suave quando a linha muda."""
         # Fade in + scale up da linha atual
         self.current_label.opacity = 0
-        self.current_label.font_size = 60  # Número, não string
+        self.current_label.font_size = 70
         
         anim = Animation(
             opacity=1,
-            font_size=70,  # Número, não string
+            font_size=80,
             duration=0.3,
             transition='out_cubic'
         )
