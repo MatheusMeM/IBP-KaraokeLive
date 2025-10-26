@@ -45,7 +45,7 @@ class RehearsalScreen(Screen):
             pos_hint={'x': 0, 'y': 0}
         )
         with subtitle_blocker.canvas.before:
-            Color(0, 0, 0, 0.9)  # Semi-opaque black overlay
+            Color(0, 0, 0, 1) 
             self.blocker_bg = Rectangle(
                 pos=subtitle_blocker.pos,
                 size=subtitle_blocker.size

@@ -103,7 +103,7 @@
         # Countdown number with IBP branding
         Label:
             id: countdown_label
-            text: root.label.text if hasattr(root, 'label') else '3'
+            text: '3'
             font_name: 'Roboto'
             font_size: '250sp'
             bold: True
@@ -126,70 +126,89 @@
             pos: self.pos
             size: self.size
     
-    FloatLayout:
-        Image:
-            source: 'assets/images/background_graphic.png'
-            allow_stretch: True
-            keep_ratio: False
-            opacity: 0.15
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: screen_padding
+        spacing: dp(30)
         
-        # IBP Logo at top
-        Image:
-            source: 'assets/images/ibp_logo_simples.png'
-            size_hint: (None, None)
-            size: (dp(200), dp(80))
-            pos_hint: {'center_x': 0.5, 'top': 0.95}
-            allow_stretch: True
-            keep_ratio: True
+        # Top spacer
+        Widget:
+            size_hint_y: 0.05
         
-        # Content container
+        # Content box (gray background)
         BoxLayout:
-            orientation: 'vertical'
-            padding: screen_padding
-            spacing: dp(40)
-            size_hint: (0.8, 0.7)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint_y: 0.7
+            padding: dp(50)
+            canvas.before:
+                Color:
+                    rgba: color_light_gray
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(30)]
             
-            # Top spacer
-            Widget:
-                size_hint_y: 0.1
-            
-            # Title
-            BrandedLabel:
-                text: ' ÓTIMO ENSAIO!'
-                font_size: '70sp'
-                bold: True
-                color: color_primary_green
-                size_hint_y: 0.2
-            
-            # Message box
             BoxLayout:
-                size_hint_y: 0.4
-                padding: dp(40)
-                canvas.before:
-                    Color:
-                        rgba: color_light_gray
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(30)]
+                orientation: 'vertical'
+                spacing: dp(20)
                 
+                # Title (green with blue outline)
                 BrandedLabel:
-                    text: 'Agora é pra valer!\\n\\nCante com confiança e mostre seu talento.\\n\\nPronto para começar?'
-                    font_size: '42sp'
+                    text: 'ÓTIMO ENSAIO!'
+                    font_size: '60sp'
+                    bold: True
+                    color: color_primary_green
+                    size_hint_y: 0.15
+                    outline_width: 3
+                    outline_color: color_primary_blue
+                
+                # Subtitle (blue)
+                BrandedLabel:
+                    text: 'Agora é pra valer!'
+                    font_size: '50sp'
+                    color: color_primary_blue
+                    size_hint_y: 0.10
+                    outline_width: 2
+                    outline_color: color_primary_green
+                
+                # Message text
+                BrandedLabel:
+                    text: 'Cante com confiança e mostre seu talento.\n\nPronto para começar?'
+                    markup: True
+                    font_size: '40sp'
                     text_size: self.width, None
+                    size_hint_y: 0.55
+                    valign: 'top'
                     halign: 'center'
-                    valign: 'middle'
+                    padding: [dp(30), dp(20)]
+                    color: color_primary_blue
+        
+        # Action button
+        BrandedButton:
+            text: 'Valendo!'
+            size_hint_y: 0.15
+            on_press: root.start_performance(self)
+        
+        # Logo
+        BoxLayout:
+            size_hint_y: 0.1
             
-            # Start button
-            BrandedButton:
-                text: '▶ VALENDO!'
-                size_hint_y: 0.15
-                on_press: root.start_performance(self)
-            
-            # Bottom spacer
-            Widget:
-                size_hint_y: 0.15
+            Image:
+                source: 'assets/images/ibp_logo_simples.png'
+                size_hint_y: 0.1
+                height: dp(60)
+                allow_stretch: True
+                keep_ratio: True
+        
+        # Bottom spacer
+        Widget:
+            size_hint_y: 0.01
+
 
 <PerformanceScreen>:
     name: 'performance'
@@ -204,69 +223,79 @@
             pos: self.pos
             size: self.size
     
-    FloatLayout:
-        Image:
-            source: 'assets/images/background_graphic.png'
-            allow_stretch: True
-            keep_ratio: False
-            opacity: 0.15
+    Image:
+        source: 'assets/images/background_graphic.png'
+        allow_stretch: True
+        keep_ratio: False
+        opacity: 0.15
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: screen_padding
+        spacing: dp(30)
         
-        # IBP Logo at top
-        Image:
-            source: 'assets/images/ibp_logo_simples.png'
-            size_hint: (None, None)
-            size: (dp(200), dp(80))
-            pos_hint: {'center_x': 0.5, 'top': 0.95}
-            allow_stretch: True
-            keep_ratio: True
+        # Top spacer
+        Widget:
+            size_hint_y: 0.05
         
-        # Content container
+        # Content box (gray background)
         BoxLayout:
-            orientation: 'vertical'
-            padding: screen_padding
-            spacing: dp(40)
-            size_hint: (0.8, 0.65)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+            size_hint_y: 0.7
+            padding: dp(50)
+            canvas.before:
+                Color:
+                    rgba: color_light_gray
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(30)]
             
-            # Title
-            BrandedLabel:
-                text: ' PARABÉNS! '
-                font_size: '80sp'
-                bold: True
-                color: (1, 0.7, 0, 1)
-                size_hint_y: 0.3
-                outline_width: 3
-                outline_color: color_primary_blue
-            
-            # Message box
             BoxLayout:
-                size_hint_y: 0.4
-                padding: dp(40)
-                canvas.before:
-                    Color:
-                        rgba: color_light_gray
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(30)]
+                orientation: 'vertical'
+                spacing: dp(20)
                 
+                # Title (yellow with blue outline)
                 BrandedLabel:
-                    text: 'Você mandou muito bem!\\n\\nObrigado por participar do\\nKaraoke IBP'
+                    text: 'PARABÉNS!'
+                    font_size: '80sp'
+                    bold: True
+                    color: (1, 0.7, 0, 1)
+                    size_hint_y: 0.25
+                    outline_width: 3
+                    outline_color: color_primary_blue
+                
+                # Message text
+                BrandedLabel:
+                    text: 'Você mandou muito bem!\n\nObrigado por participar do\nKaraoke IBP'
+                    markup: True
                     font_size: '45sp'
                     text_size: self.width, None
+                    size_hint_y: 0.55
+                    valign: 'top'
                     halign: 'center'
-                    valign: 'middle'
+                    padding: [dp(30), dp(20)]
+                    color: color_primary_blue
+        
+        # Restart button
+        BrandedButton:
+            text: 'JOGAR NOVAMENTE'
+            size_hint_y: 0.15
+            on_press: root.restart(self)
+        
+        # Logo
+        BoxLayout:
+            size_hint_y: 0.1
             
-            # Restart button
-            BrandedButton:
-                text: ' JOGAR NOVAMENTE'
-                size_hint_y: 0.2
-                font_size: '45sp'
-                on_press: root.restart(self)
-            
-            # Bottom spacer
-            Widget:
+            Image:
+                source: 'assets/images/ibp_logo_simples.png'
                 size_hint_y: 0.1
+                height: dp(60)
+                allow_stretch: True
+                keep_ratio: True
+        
+        # Bottom spacer
+        Widget:
+            size_hint_y: 0.01
 
 <InstructionsScreen>:
     name: 'instructions'
@@ -311,10 +340,13 @@
                 BrandedLabel:
                     id: title_label
                     text: root.title_text
-                    font_size: '55sp'
+                    font_size: '60sp'
                     bold: True
+                    color: (1, 0.7, 0, 1)
                     size_hint_y: 0.15
-                
+                    outline_width: 3
+                    outline_color: color_primary_blue
+                    
                 BrandedLabel:
                     id: body_label
                     text: root.body_text
