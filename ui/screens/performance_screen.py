@@ -7,6 +7,7 @@ from kivy.uix.label import Label
 from kivy.uix.video import Video
 from kivy.clock import Clock
 from kivy.animation import Animation
+from kivy.core.window import Window
 
 from modules.audio_router import AudioRouter
 from modules.lyric_display import LyricDisplay
@@ -134,6 +135,9 @@ class PerformanceScreen(Screen):
     
     def on_enter(self):
         """Iniciar performance."""
+        # Bind keyboard for skip shortcut (development)
+        Window.bind(on_keyboard=self._on_keyboard)
+        
         # Configurar roteamento e carregar áudios (vocal + instrumental)
         self.audio_router.set_performance_mode()
         vocal_file = 'assets/audio/Ibp - Energia da Revolucao.wav'
@@ -152,6 +156,24 @@ class PerformanceScreen(Screen):
         
         # Agendar atualização
         self.update_event = Clock.schedule_interval(self.update, 1/30)
+    
+    def _on_keyboard(self, window, key, scancode, codepoint, modifier):
+        """
+        Handle keyboard input for development shortcuts.
+        
+        Args:
+            key: Key code
+            codepoint: Character code
+        
+        Returns:
+            True if handled, False otherwise
+        """
+        # 'S' key = skip (development shortcut)
+        if codepoint == 's' or codepoint == 'S':
+            print("🔧 DEV: Skip shortcut pressed - performance")
+            self.finish_performance()
+            return True
+        return False
     
     def update(self, dt):
         """Atualizar letras e timer."""
@@ -188,6 +210,9 @@ class PerformanceScreen(Screen):
     
     def on_leave(self):
         """Cleanup."""
+        # Unbind keyboard
+        Window.unbind(on_keyboard=self._on_keyboard)
+        
         if self.update_event:
             self.update_event.cancel()
         self.audio_router.stop()
