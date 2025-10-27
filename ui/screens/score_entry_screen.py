@@ -59,7 +59,14 @@ class ScoreEntryScreen(Screen):
             multiline=False,
             font_size='50sp',
             size_hint=(0.8, 0.15),
-            pos_hint={'center_x': 0.5}
+            pos_hint={'center_x': 0.5},
+            # Touchscreen keyboard optimization
+            write_tab=False,  # Prevent tab input
+            on_text_validate=self.submit_score  # Submit on Enter key
+        )
+        # Apply ASCII-only filter as a function (prevents emojis)
+        self.name_input.input_filter = lambda text, from_undo: ''.join(
+            c for c in text if ord(c) < 128
         )
         main_layout.add_widget(self.name_input)
         

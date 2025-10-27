@@ -9,7 +9,10 @@ import os
 from kivy.config import Config
 
 # Import our configuration
-from config.app_config import WINDOW_WIDTH, WINDOW_HEIGHT, FULLSCREEN, BORDERLESS
+from config.app_config import (
+    WINDOW_WIDTH, WINDOW_HEIGHT, FULLSCREEN, BORDERLESS,
+    KEYBOARD_MODE, KEYBOARD_LAYOUT
+)
 
 # Set window properties before other Kivy imports
 Config.set('graphics', 'width', str(WINDOW_WIDTH))
@@ -17,6 +20,14 @@ Config.set('graphics', 'height', str(WINDOW_HEIGHT))
 Config.set('graphics', 'fullscreen', 'auto' if FULLSCREEN else '0')
 Config.set('graphics', 'borderless', '1' if BORDERLESS else '0')
 Config.set('graphics', 'resizable', '0')
+
+# Configure virtual keyboard for touchscreen support
+Config.set('kivy', 'keyboard_mode', KEYBOARD_MODE)
+Config.set('kivy', 'keyboard_layout', KEYBOARD_LAYOUT)
+
+# Reduce keyboard height to prevent blocking UI elements
+# Default is 0.3 (30% of screen), reducing to 25% for 1920x1080
+Config.set('kivy', 'keyboard_height', '270')  # 25% of 1080px
 
 # Windows-specific: Use default audio driver (no need for ALSA like Raspberry Pi)
 # Note: SDL_AUDIODRIVER environment variable can be set if needed

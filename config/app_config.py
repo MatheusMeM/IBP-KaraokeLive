@@ -10,6 +10,17 @@ FULLSCREEN = True  # Set to False for development, True for production
 BORDERLESS = True  # Kiosk mode
 
 # =============================================================================
+# VIRTUAL KEYBOARD CONFIGURATION (TOUCHSCREEN SUPPORT)
+# =============================================================================
+# Enable virtual keyboard for touchscreen-only kiosk
+# Options: 'system', 'dock', 'systemanddock', 'systemandmulti', ''
+# - 'systemanddock': Shows keyboard below content, shifts view up
+# - 'systemandmulti': Shows keyboard floating, doesn't shift view
+# - 'dock': Uses Kivy's built-in keyboard (docked at bottom)
+KEYBOARD_MODE = 'dock'  # Use Kivy's built-in keyboard for better control
+KEYBOARD_LAYOUT = 'qwerty'  # Keyboard layout type
+
+# =============================================================================
 # FILE PATHS
 # =============================================================================
 LEADERBOARD_FILE = "data/leaderboard.json"

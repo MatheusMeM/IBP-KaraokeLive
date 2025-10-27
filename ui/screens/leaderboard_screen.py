@@ -5,6 +5,7 @@ Phase 0: Basic leaderboard screen adapted from Interactive Stand Game
 
 import json
 from kivy.uix.screenmanager import Screen
+from kivy.uix.label import Label
 from kivy.properties import StringProperty, ListProperty
 
 
@@ -30,19 +31,90 @@ class LeaderboardScreen(Screen):
             from data.ranking_manager import RankingManager
             
             ranking = RankingManager()
-            today_scores = ranking.get_today_scores()  # Already filtered by date
+            today_scores = ranking.get_today_scores()
             
             if not today_scores:
                 self.status_text = "Nenhum score hoje.\nSeja o primeiro!"
                 self.leaderboard_data = []
             else:
-                # Already sorted by RankingManager
-                self.leaderboard_data = today_scores[:10]  # Top 10
+                self.leaderboard_data = today_scores[:10]
                 self.status_text = f"Top {len(self.leaderboard_data)} de Hoje"
+            
+            # Populate the grid with widgets
+            self._populate_grid()
                 
         except Exception as e:
             self.status_text = f"Erro: {str(e)}"
             self.leaderboard_data = []
+            self._populate_grid()
+
+    def _populate_grid(self):
+        """Populate the leaderboard grid with score widgets."""
+        grid = self.ids.get('leaderboard_grid')
+        if not grid:
+            return
+        
+        # Clear existing widgets
+        grid.clear_widgets()
+        
+        if not self.leaderboard_data:
+            # Show empty state
+            empty_label = Label(
+                text=self.status_text,
+                font_size='40sp',
+                color=(0/255, 64/255, 119/255, 1),
+                halign='center',
+                valign='middle',
+                size_hint_y=None,
+                height=100
+            )
+            grid.add_widget(empty_label)
+            return
+        
+        # Add header row
+        for header_text in ['#', 'Nome', 'Pontos']:
+            header = Label(
+                text=header_text,
+                font_size='35sp',
+                bold=True,
+                color=(0/255, 64/255, 119/255, 1),
+                size_hint_y=None,
+                height=50
+            )
+            grid.add_widget(header)
+        
+        # Add score rows
+        for idx, score_entry in enumerate(self.leaderboard_data, 1):
+            # Rank
+            rank_label = Label(
+                text=str(idx),
+                font_size='32sp',
+                color=(0/255, 64/255, 119/255, 1),
+                size_hint_y=None,
+                height=45
+            )
+            grid.add_widget(rank_label)
+            
+            # Name
+            name_label = Label(
+                text=score_entry.get('name', 'N/A'),
+                font_size='32sp',
+                color=(0/255, 64/255, 119/255, 1),
+                size_hint_y=None,
+                height=45
+            )
+            grid.add_widget(name_label)
+            
+            # Score
+            score_label = Label(
+                text=str(score_entry.get('score', 0)),
+                font_size='32sp',
+                bold=True,
+                color=(134/255, 188/255, 37/255, 1),
+                size_hint_y=None,
+                height=45
+            )
+            grid.add_widget(score_label)
 
     def update_leaderboard(self, scores: list, highlight_player: str = None):
         """
@@ -56,8 +128,10 @@ class LeaderboardScreen(Screen):
             self.status_text = "Nenhum score registrado hoje.\nSeja o primeiro a jogar!"
             self.leaderboard_data = []
         else:
-            self.leaderboard_data = scores[:10]  # Top 10
+            self.leaderboard_data = scores[:10]
             self.status_text = f"Top {len(self.leaderboard_data)} jogadores de hoje"
+        
+        self._populate_grid()
 
     def go_to_welcome(self):
         """Navigate back to welcome screen."""
