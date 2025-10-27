@@ -13,7 +13,9 @@ from kivy.core.window import Window
 from kivy.config import Config
 
 import sys
-sys.path.insert(0, '/mnt/user-data/outputs')
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'docs', 'id visual'))
 from score_entry_screen_ibp import ScoreEntryScreen
 
 

@@ -333,7 +333,7 @@ class ScoreEntryScreen(Screen):
             font_name='Roboto',
             font_size=dp(38),
             bold=True,
-            color=COLOR_PRIMARY_BLUE,
+            color=COLOR_WHITE,
             halign='center',
             valign='middle'
         )
@@ -427,30 +427,29 @@ class ScoreEntryScreen(Screen):
     def submit_score(self, instance):
         """Envia pontuação para o ranking."""
         name = self.name_display.text.strip()
-        
+
         # Validação
         if not name:
             print("❌ Nome obrigatório")
             self.name_display.color = (1, 0, 0, 1)  # Vermelho
             return
-        
+
         if len(name) < 3:
             print("❌ Nome muito curto (mínimo 3 caracteres)")
             self.name_display.color = (1, 0, 0, 1)
             return
-        
+
         # Restaura cor
-        self.name_display.color = COLOR_PRIMARY_BLUE
-        
+        self.name_display.color = COLOR_WHITE
+
         # Salva no ranking
         success = self.ranking.add_score(name, self.score)
-        
+
         if success:
             print(f"✅ Pontuação salva: {name} = {self.score}")
-            
-            # Navega para o ranking
-            leaderboard = self.manager.get_screen('leaderboard')
-            leaderboard.refresh_leaderboard()
-            self.manager.current = 'leaderboard'
+
+            # Para teste, apenas limpa o campo e mantém na tela
+            self.name_display.text = ''
+            print("🎯 Pronto para próxima pontuação")
         else:
             print("❌ Falha ao salvar pontuação")

@@ -1,71 +1,160 @@
-"""Score entry screen with fixed virtual keyboard layout.
+"""Tela de entrada de pontuação com teclado virtual fixo.
 
-Layout design:
-- Bottom 30% of screen: Always-visible compact virtual keyboard
-- Top 70% of screen: Score display, input field, submit button
-- No overlap, optimized for 1920x1080 kiosk display
+Design:
+- 30% inferior: Teclado virtual sempre visível
+- 70% superior: Pontuação, avaliação, entrada de nome e botão
+- Identidade visual IBP aplicada
 """
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.image import Image
 from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.metrics import dp
-from kivy.core.window import Window
+from kivy.app import App
 
 from data.ranking_manager import RankingManager
 
 
+# Cores da marca IBP
+COLOR_PRIMARY_BLUE = (0/255, 64/255, 119/255, 1)      # #004077
+COLOR_SECONDARY_BLUE = (0/255, 105/255, 180/255, 1)   # #0069B4
+COLOR_PRIMARY_GREEN = (134/255, 188/255, 37/255, 1)   # #86BC25
+COLOR_SECONDARY_GREEN = (82/255, 174/255, 50/255, 1)  # #52AE32
+COLOR_WHITE = (1, 1, 1, 1)
+COLOR_DARK_GRAY = (137/255, 137/255, 137/255, 1)
+COLOR_LIGHT_GRAY = (216/255, 206/255, 205/255, 1)
+
+
+class BrandedButton(Button):
+    """Botão estilizado com identidade IBP."""
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.font_name = 'Roboto'
+        self.background_color = (0, 0, 0, 0)  # Transparente
+        self.background_normal = ''
+        self.color = COLOR_PRIMARY_BLUE
+        self.bold = True
+        
+        # Desenhar fundo com bordas arredondadas
+        with self.canvas.before:
+            self.bg_color = Color(*COLOR_PRIMARY_GREEN)
+            self.bg_rect = RoundedRectangle(
+                pos=self.pos,
+                size=self.size,
+                radius=[dp(30)]
+            )
+        
+        self.bind(pos=self._update_bg, size=self._update_bg)
+        self.bind(state=self._on_state)
+    
+    def _update_bg(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+    
+    def _on_state(self, instance, value):
+        """Muda cor quando pressionado."""
+        if value == 'down':
+            self.bg_color.rgba = COLOR_SECONDARY_GREEN
+        else:
+            self.bg_color.rgba = COLOR_PRIMARY_GREEN
+
+
+class VirtualKeyButton(Button):
+    """Botão de teclado virtual."""
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.font_name = 'Roboto'
+        self.background_color = (0, 0, 0, 0)
+        self.background_normal = ''
+        self.color = COLOR_WHITE
+        self.bold = True
+        
+        with self.canvas.before:
+            self.bg_color = Color(0.3, 0.3, 0.3, 1)
+            self.bg_rect = RoundedRectangle(
+                pos=self.pos,
+                size=self.size,
+                radius=[dp(8)]
+            )
+        
+        self.bind(pos=self._update_bg, size=self._update_bg)
+        self.bind(state=self._on_state)
+    
+    def _update_bg(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+    
+    def _on_state(self, instance, value):
+        if value == 'down':
+            self.bg_color.rgba = (0.2, 0.2, 0.2, 1)
+        else:
+            self.bg_color.rgba = (0.3, 0.3, 0.3, 1)
+
+
 class CompactVirtualKeyboard(BoxLayout):
-    """Compact virtual keyboard optimized for 30% screen height."""
+    """Teclado virtual compacto QWERTY em português."""
     
     def __init__(self, on_key_press, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
-        self.spacing = dp(3)
-        self.padding = [dp(10), dp(8), dp(10), dp(8)]
+        self.spacing = dp(4)
+        self.padding = [dp(15), dp(10), dp(15), dp(10)]
         self.on_key_press = on_key_press
         
-        # Keyboard background
+        # Fundo do teclado
         with self.canvas.before:
-            Color(0.15, 0.15, 0.15, 1)  # Dark gray
-            self.bg_rect = RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(10)])
+            Color(*COLOR_DARK_GRAY)
+            self.bg_rect = RoundedRectangle(
+                pos=self.pos,
+                size=self.size,
+                radius=[dp(15)]
+            )
         self.bind(pos=self._update_bg, size=self._update_bg)
         
-        # Define keyboard layout (compact 4 rows)
+        # Layout QWERTY em português (4 linhas)
         keyboard_layout = [
-            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '⌫'],  # Numbers + backspace
-            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],        # Top row
-            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],            # Middle row
-            ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'SPACE', '✓']         # Bottom row + submit
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'APAGAR'],
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+            ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'ESPACO', 'OK']
         ]
         
         for row_keys in keyboard_layout:
-            row = BoxLayout(spacing=dp(3), size_hint_y=0.25)
+            row = BoxLayout(spacing=dp(4), size_hint_y=0.25)
             
             for key in row_keys:
-                btn = Button(
-                    text=key,
-                    font_size=dp(24) if key != 'SPACE' else dp(16),
-                    bold=True,
-                    background_normal='',
-                    background_color=(0.3, 0.3, 0.3, 1) if key not in ['⌫', '✓', 'SPACE'] else (0.2, 0.5, 0.3, 1)
-                )
-                
-                # Spacebar takes 2x width
-                if key == 'SPACE':
-                    btn.size_hint_x = 2.0
-                    btn.text = 'SPACE'
-                    btn.font_size = dp(20)
-                # Submit button gets green color
-                elif key == '✓':
-                    btn.background_color = (0.2, 0.7, 0.3, 1)
-                # Backspace gets red accent
-                elif key == '⌫':
-                    btn.background_color = (0.6, 0.2, 0.2, 1)
+                # Criar botão
+                if key == 'APAGAR':
+                    btn = VirtualKeyButton(
+                        text='←',
+                        font_size=dp(28),
+                        size_hint_x=1.2
+                    )
+                    btn.bg_color.rgba = (0.6, 0.2, 0.2, 1)  # Vermelho
+                elif key == 'OK':
+                    btn = BrandedButton(
+                        text='✓',
+                        font_size=dp(32),
+                        size_hint_x=1.0
+                    )
+                elif key == 'ESPACO':
+                    btn = VirtualKeyButton(
+                        text='ESPAÇO',
+                        font_size=dp(18),
+                        size_hint_x=2.0
+                    )
+                else:
+                    btn = VirtualKeyButton(
+                        text=key,
+                        font_size=dp(28),
+                        size_hint_x=1.0
+                    )
                 
                 btn.bind(on_press=lambda instance, k=key: self.on_key_press(k))
                 row.add_widget(btn)
@@ -73,201 +162,295 @@ class CompactVirtualKeyboard(BoxLayout):
             self.add_widget(row)
     
     def _update_bg(self, *args):
-        """Update background rectangle."""
         self.bg_rect.pos = self.pos
         self.bg_rect.size = self.size
 
 
 class ScoreEntryScreen(Screen):
-    """Score entry screen with fixed keyboard layout."""
+    """Tela de entrada de pontuação com identidade visual IBP."""
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.score = 0
         self.ranking = RankingManager()
         
-        # Root layout using FloatLayout for precise positioning
+        # Layout raiz
         root = FloatLayout()
         
-        # Background
+        # ===== FUNDO BRANCO COM GRÁFICO =====
         with root.canvas.before:
-            Color(0.05, 0.05, 0.1, 1)  # Dark blue background
+            Color(*COLOR_WHITE)
             self.bg_rect = Rectangle(pos=root.pos, size=root.size)
         root.bind(pos=lambda *args: setattr(self.bg_rect, 'pos', root.pos))
         root.bind(size=lambda *args: setattr(self.bg_rect, 'size', root.size))
         
-        # ===== BOTTOM 30%: FIXED KEYBOARD =====
+        # Gráfico de fundo (opacity baixa)
+        bg_graphic = Image(
+            source='assets/images/background_graphic.png',
+            allow_stretch=True,
+            keep_ratio=False,
+            opacity=0.15,
+            size_hint=(1, 1),
+            pos_hint={'x': 0, 'y': 0}
+        )
+        root.add_widget(bg_graphic)
+        
+        # ===== TECLADO NA BASE (30%) =====
         self.keyboard = CompactVirtualKeyboard(
             on_key_press=self.handle_key_press,
             size_hint=(1, 0.30),
-            pos_hint={'x': 0, 'y': 0}  # Anchored at bottom
+            pos_hint={'x': 0, 'y': 0}
         )
         root.add_widget(self.keyboard)
         
-        # ===== TOP 70%: CONTENT AREA =====
+        # ===== ÁREA DE CONTEÚDO (70%) =====
         content_area = BoxLayout(
             orientation='vertical',
-            spacing=dp(15),
-            padding=[dp(40), dp(20), dp(40), dp(20)],
+            spacing=dp(20),
+            padding=[dp(60), dp(30), dp(60), dp(30)],
             size_hint=(1, 0.70),
-            pos_hint={'x': 0, 'y': 0.30}  # Starts at 30% from bottom
+            pos_hint={'x': 0, 'y': 0.30}
         )
         
-        # 1. Score display (20% of content area)
-        self.score_label = Label(
-            text='YOUR SCORE: 0',
-            font_size=dp(72),
+        # Espaçador superior
+        content_area.add_widget(BoxLayout(size_hint_y=0.05))
+        
+        # Container com fundo cinza claro
+        content_box = BoxLayout(
+            orientation='vertical',
+            spacing=dp(20),
+            padding=dp(40),
+            size_hint_y=0.85
+        )
+        
+        # Fundo cinza claro arredondado
+        with content_box.canvas.before:
+            Color(*COLOR_LIGHT_GRAY)
+            self.content_bg = RoundedRectangle(
+                pos=content_box.pos,
+                size=content_box.size,
+                radius=[dp(30)]
+            )
+        content_box.bind(
+            pos=lambda *args: setattr(self.content_bg, 'pos', content_box.pos),
+            size=lambda *args: setattr(self.content_bg, 'size', content_box.size)
+        )
+        
+        # 1. Título
+        title_label = Label(
+            text='SUA PONTUAÇÃO',
+            font_name='Roboto',
+            font_size=dp(48),
             bold=True,
-            color=(1, 0.84, 0, 1),  # Gold
+            color=COLOR_PRIMARY_GREEN,
+            size_hint_y=0.15,
+            halign='center',
+            valign='middle',
+            outline_width=2,
+            outline_color=COLOR_PRIMARY_BLUE
+        )
+        title_label.bind(size=title_label.setter('text_size'))
+        content_box.add_widget(title_label)
+        
+        # 2. Pontuação
+        self.score_label = Label(
+            text='0',
+            font_name='Roboto',
+            font_size=dp(80),
+            bold=True,
+            color=COLOR_PRIMARY_BLUE,
             size_hint_y=0.20,
             halign='center',
-            valign='middle'
+            valign='middle',
+            outline_width=3,
+            outline_color=COLOR_PRIMARY_GREEN
         )
         self.score_label.bind(size=self.score_label.setter('text_size'))
-        content_area.add_widget(self.score_label)
+        content_box.add_widget(self.score_label)
         
-        # 2. Stars display (15% of content area)
+        # 3. Avaliação em estrelas (texto, sem emoji)
         self.stars_label = Label(
-            text='★ ★ ★ ★ ★',
-            font_size=dp(50),
-            color=(1, 0.84, 0, 1),
-            size_hint_y=0.15,
+            text='',
+            font_name='Roboto',
+            font_size=dp(36),
+            bold=True,
+            color=COLOR_SECONDARY_BLUE,
+            size_hint_y=0.12,
             halign='center',
             valign='middle'
         )
         self.stars_label.bind(size=self.stars_label.setter('text_size'))
-        content_area.add_widget(self.stars_label)
+        content_box.add_widget(self.stars_label)
         
-        # 3. Spacer (10% of content area)
-        content_area.add_widget(BoxLayout(size_hint_y=0.10))
+        # Espaçador
+        content_box.add_widget(BoxLayout(size_hint_y=0.08))
         
-        # 4. Name label (10% of content area)
-        name_label = Label(
-            text='Enter Your Name:',
+        # 4. Label de instrução
+        instruction_label = Label(
+            text='Digite seu nome:',
+            font_name='Roboto',
             font_size=dp(32),
-            color=(1, 1, 1, 1),
+            color=COLOR_PRIMARY_BLUE,
             size_hint_y=0.10,
             halign='center',
             valign='middle'
         )
-        name_label.bind(size=name_label.setter('text_size'))
-        content_area.add_widget(name_label)
+        instruction_label.bind(size=instruction_label.setter('text_size'))
+        content_box.add_widget(instruction_label)
         
-        # 5. Text input (20% of content area)
-        # Using Label instead of TextInput to avoid OS keyboard
-        input_container = BoxLayout(
-            size_hint=(0.8, 0.20),
-            pos_hint={'center_x': 0.5}
+        # 5. Campo de entrada (como label)
+        input_container = AnchorLayout(
+            size_hint_y=0.18,
+            anchor_x='center',
+            anchor_y='center'
+        )
+        
+        input_box = BoxLayout(
+            size_hint=(0.85, 1),
+            padding=dp(15)
+        )
+        
+        # Fundo branco do input
+        with input_box.canvas.before:
+            Color(*COLOR_WHITE)
+            self.input_bg = RoundedRectangle(
+                pos=input_box.pos,
+                size=input_box.size,
+                radius=[dp(15)]
+            )
+            Color(*COLOR_PRIMARY_BLUE)
+            self.input_border = RoundedRectangle(
+                pos=input_box.pos,
+                size=input_box.size,
+                radius=[dp(15)]
+            )
+        input_box.bind(
+            pos=self._update_input_bg,
+            size=self._update_input_bg
         )
         
         self.name_display = Label(
             text='',
-            font_size=dp(40),
+            font_name='Roboto',
+            font_size=dp(38),
             bold=True,
-            color=(0, 0, 0, 1),
+            color=COLOR_WHITE,
             halign='center',
             valign='middle'
         )
         self.name_display.bind(size=self.name_display.setter('text_size'))
         
-        # Input background
-        with input_container.canvas.before:
-            Color(1, 1, 1, 1)  # White background
-            self.input_bg = RoundedRectangle(
-                pos=input_container.pos,
-                size=input_container.size,
-                radius=[dp(10)]
-            )
-        input_container.bind(
-            pos=lambda *args: setattr(self.input_bg, 'pos', input_container.pos),
-            size=lambda *args: setattr(self.input_bg, 'size', input_container.size)
+        input_box.add_widget(self.name_display)
+        input_container.add_widget(input_box)
+        content_box.add_widget(input_container)
+        
+        # Espaçador
+        content_box.add_widget(BoxLayout(size_hint_y=0.05))
+        
+        # 6. Botão de enviar
+        button_container = AnchorLayout(
+            size_hint_y=0.12,
+            anchor_x='center',
+            anchor_y='center'
         )
         
-        input_container.add_widget(self.name_display)
-        content_area.add_widget(input_container)
-        
-        # 6. Spacer (5% of content area)
-        content_area.add_widget(BoxLayout(size_hint_y=0.05))
-        
-        # 7. Submit button (20% of content area)
-        self.submit_btn = Button(
-            text='SUBMIT SCORE',
-            font_size=dp(36),
-            bold=True,
-            size_hint=(0.6, 0.20),
-            pos_hint={'center_x': 0.5},
-            background_normal='',
-            background_color=(0.2, 0.7, 0.3, 1)  # Green
+        self.submit_btn = BrandedButton(
+            text='ENVIAR PONTUAÇÃO',
+            font_size=dp(40),
+            size_hint=(0.7, 1)
         )
         self.submit_btn.bind(on_press=self.submit_score)
-        content_area.add_widget(self.submit_btn)
+        
+        button_container.add_widget(self.submit_btn)
+        content_box.add_widget(button_container)
+        
+        content_area.add_widget(content_box)
+        
+        # Espaçador inferior
+        content_area.add_widget(BoxLayout(size_hint_y=0.10))
         
         root.add_widget(content_area)
         self.add_widget(root)
     
+    def _update_input_bg(self, instance, value):
+        """Atualiza fundo do input."""
+        # Fundo branco
+        self.input_bg.pos = (instance.pos[0] + dp(2), instance.pos[1] + dp(2))
+        self.input_bg.size = (instance.size[0] - dp(4), instance.size[1] - dp(4))
+        # Borda azul
+        self.input_border.pos = instance.pos
+        self.input_border.size = instance.size
+    
     def handle_key_press(self, key):
-        """Handle virtual keyboard input."""
+        """Processa entrada do teclado virtual."""
         current_text = self.name_display.text
         
-        if key == '⌫':  # Backspace
+        if key == 'APAGAR':
             self.name_display.text = current_text[:-1]
         
-        elif key == 'SPACE':
-            if len(current_text) < 20:  # Max 20 chars
+        elif key == 'ESPACO':
+            if len(current_text) < 20:
                 self.name_display.text = current_text + ' '
         
-        elif key == '✓':  # Submit
+        elif key == 'OK':
             self.submit_score(None)
         
-        else:  # Regular character
-            if len(current_text) < 20:  # Max 20 chars
+        else:
+            if len(current_text) < 20:
                 self.name_display.text = current_text + key
     
     def set_score(self, score: int):
-        """Set score to display."""
+        """Define pontuação para exibir."""
         self.score = score
-        self.score_label.text = f'YOUR SCORE: {score}'
+        self.score_label.text = str(score)
         
-        # Star rating (0-5 stars based on score 0-100)
-        stars = min(5, max(0, int(score / 20)))
-        filled = '★ ' * stars
-        empty = '☆ ' * (5 - stars)
-        self.stars_label.text = filled + empty
+        # Avaliação em texto (sem emojis)
+        if score >= 90:
+            rating = 'EXCELENTE!'
+        elif score >= 75:
+            rating = 'MUITO BOM!'
+        elif score >= 60:
+            rating = 'BOM'
+        elif score >= 40:
+            rating = 'REGULAR'
+        else:
+            rating = 'CONTINUE PRATICANDO'
+        
+        self.stars_label.text = rating
     
     def on_enter(self):
-        """Clear input when entering screen."""
+        """Limpa entrada ao entrar na tela."""
         self.name_display.text = ''
         print(f"\n{'='*50}")
-        print(f"🎯 Score Entry Screen - Score: {self.score}")
+        print(f"🎯 Tela de Entrada de Pontuação - Pontos: {self.score}")
         print(f"{'='*50}")
     
     def submit_score(self, instance):
-        """Submit score to leaderboard."""
+        """Envia pontuação para o ranking."""
         name = self.name_display.text.strip()
-        
-        # Validation
+
+        # Validação
         if not name:
-            print("❌ Name required")
-            self.name_display.color = (1, 0, 0, 1)  # Red text
+            print("❌ Nome obrigatório")
+            self.name_display.color = (1, 0, 0, 1)  # Vermelho
             return
-        
+
         if len(name) < 3:
-            print("❌ Name too short (min 3 chars)")
-            self.name_display.color = (1, 0, 0, 1)  # Red text
+            print("❌ Nome muito curto (mínimo 3 caracteres)")
+            self.name_display.color = (1, 0, 0, 1)
             return
-        
-        # Reset color
-        self.name_display.color = (0, 0, 0, 1)
-        
-        # Save to leaderboard
+
+        # Restaura cor
+        self.name_display.color = COLOR_WHITE
+
+        # Salva no ranking
         success = self.ranking.add_score(name, self.score)
-        
+
         if success:
-            print(f"✅ Score saved: {name} = {self.score}")
-            
-            # Navigate to leaderboard
-            leaderboard = self.manager.get_screen('leaderboard')
-            leaderboard.refresh_leaderboard()
-            self.manager.current = 'leaderboard'
+            print(f"✅ Pontuação salva: {name} = {self.score}")
+
+            # Navigate to leaderboard screen
+            app = App.get_running_app()
+            app.app_manager.show_leaderboard(player_name=name)
         else:
-            print("❌ Failed to save score")
+            print("❌ Falha ao salvar pontuação")
