@@ -35,6 +35,7 @@ Config.set('kivy', 'keyboard_height', '270')  # 25% of 1080px
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
+from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 
 from ui.screens.welcome_screen import WelcomeScreen
@@ -49,6 +50,7 @@ from ui.screens.congratulations_screen import (
     CongratulationsScreen
 )
 from ui.app_manager import AppManager
+from ui.widgets.emergency_reset_button import EmergencyResetButton
 
 
 class KaraokeApp(App):
@@ -58,16 +60,16 @@ class KaraokeApp(App):
         """Build and return the root widget."""
         # Load the KV file that defines screen layouts
         Builder.load_file('ui/screens/screens.kv')
-        
+
         # Create the screen manager with smooth transitions
         sm = ScreenManager()
         sm.transition = FadeTransition(duration=0.4)
-        
+
         # Add screens (Phase 0: only basic screens, no games)
         sm.add_widget(WelcomeScreen(name='welcome'))
         sm.add_widget(InstructionsScreen(name='instructions'))
         sm.add_widget(LeaderboardScreen(name='leaderboard'))
-        
+
         # Phase 3: Add karaoke screens
         sm.add_widget(CountdownScreen(name='countdown'))
         sm.add_widget(RehearsalScreen(name='rehearsal'))
@@ -77,14 +79,22 @@ class KaraokeApp(App):
         sm.add_widget(
             CongratulationsScreen(name='congratulations')
         )
-        
+
         # Bind global keyboard shortcuts
         Window.bind(on_keyboard=self.on_key_press)
-        
+
         # Create the app manager (replaces GameManager, no GPIO/games)
         self.app_manager = AppManager(sm)
-        
-        return sm
+
+        # Create FloatLayout to hold screen manager and emergency button
+        root_layout = FloatLayout()
+        root_layout.add_widget(sm)
+
+        # Add invisible emergency reset button to top-right corner
+        emergency_button = EmergencyResetButton()
+        root_layout.add_widget(emergency_button)
+
+        return root_layout
     
     def on_key_press(self, window, key, scancode, codepoint, modifiers):
         """
