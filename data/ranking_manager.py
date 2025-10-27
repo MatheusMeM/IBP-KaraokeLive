@@ -88,7 +88,7 @@ class RankingManager:
             
             return False
     
-    def add_score(self, name: str, score: int, timestamp: str = None) -> bool:
+    def add_score(self, name: str, score: float, timestamp: str = None) -> bool:
         """
         Add a new score entry to the leaderboard.
         

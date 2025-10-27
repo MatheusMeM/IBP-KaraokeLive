@@ -107,7 +107,7 @@ class LeaderboardScreen(Screen):
             
             # Score
             score_label = Label(
-                text=str(score_entry.get('score', 0)),
+                text=f"{score_entry.get('score', 0.0):.2f}",
                 font_size='32sp',
                 bold=True,
                 color=(134/255, 188/255, 37/255, 1),

@@ -171,7 +171,7 @@ class ScoreEntryScreen(Screen):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.score = 0
+        self.score = 0.0
         self.ranking = RankingManager()
         
         # Layout raiz
@@ -399,10 +399,10 @@ class ScoreEntryScreen(Screen):
             if len(current_text) < 20:
                 self.name_display.text = current_text + key
     
-    def set_score(self, score: int):
+    def set_score(self, score: float):
         """Define pontuação para exibir."""
         self.score = score
-        self.score_label.text = str(score)
+        self.score_label.text = f"{score:.2f}"
         
         # Avaliação em texto (sem emojis)
         if score >= 90:

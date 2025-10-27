@@ -105,15 +105,15 @@ class AudioAnalyzer:
         coverage_score = min(coverage / 80.0, 1.0) * 50  # 80% coverage = max
         energy_score = min(avg_rms / 5000.0, 1.0) * 50   # 5000 RMS = max
 
-        final_score = int(coverage_score + energy_score)
+        final_score = coverage_score + energy_score
         
         # Log score calculation
         print(f"📊 Score calculation:")
         print(f"   Coverage: {coverage:.1f}% → {coverage_score:.1f} pts")
         print(f"   Energy: {avg_rms:.0f} RMS → {energy_score:.1f} pts")
-        print(f"   Final: {final_score}/100")
+        print(f"   Final: {final_score:.2f}/100")
         
-        return max(0, min(100, final_score))
+        return round(max(0.0, min(100.0, final_score)), 2)
 
     def clear(self):
         """Clear collected data."""
