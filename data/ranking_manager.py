@@ -1,6 +1,6 @@
 """
 Ranking Manager - Handles leaderboard data persistence
-Adapted from Interactive Stand Game's DataManager (Phase 0)
+Adapted from Interactive Stand Game's DataManager
 """
 
 import json
