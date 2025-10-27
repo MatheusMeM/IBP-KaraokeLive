@@ -13,8 +13,13 @@ from kivy.config import Config
 
 # Import the redesigned screen
 import sys
-sys.path.insert(0, '/mnt/user-data/outputs')
-from score_entry_screen import ScoreEntryScreen
+import os
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from ui.screens.score_entry_screen import ScoreEntryScreen
 
 
 # Mock RankingManager for testing
@@ -22,6 +27,15 @@ class MockRankingManager:
     def add_score(self, name, score):
         print(f"[MOCK] Would save: {name} = {score}")
         return True
+
+
+# Mock Leaderboard Screen
+from kivy.uix.screenmanager import Screen
+from kivy.uix.label import Label
+
+class MockLeaderboardScreen(Screen):
+    def refresh_leaderboard(self):
+        print("[MOCK] Leaderboard refreshed")
 
 
 class TestApp(App):
@@ -33,6 +47,10 @@ class TestApp(App):
         
         # Create screen manager
         sm = ScreenManager()
+        
+        # Create mock leaderboard screen
+        leaderboard_screen = MockLeaderboardScreen(name='leaderboard')
+        sm.add_widget(leaderboard_screen)
         
         # Create score entry screen
         score_screen = ScoreEntryScreen(name='score_entry')
